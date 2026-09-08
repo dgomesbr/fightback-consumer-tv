@@ -1,0 +1,35 @@
+# Data licences
+
+This repository publishes two kinds of data under two different licences.
+
+## Blocklists: CC0 1.0 Universal (public domain dedication)
+
+Everything under `blocklists/` is released into the public domain under CC0 1.0. Use it in any
+resolver, any product, any list, with or without credit.
+
+Full text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+The intent is maximum uptake. If HaGeZi, Perflyst, oisd, Pi-hole, AdGuard, NextDNS or anyone else
+wants to absorb these entries into their own lists, they should not have to ask or attribute.
+
+## Report corpus: ODbL 1.0 plus DBCL 1.0
+
+The crowdsourced report corpus (`data/reports/`) and its published derivatives, including the NDJSON
+and Parquet mirrors, are made available under the Open Database Licence 1.0. Rights in the individual
+contents of the database are licensed under the Database Contents Licence 1.0.
+
+ODbL 1.0: https://opendatacommons.org/licenses/odbl/1-0/
+DBCL 1.0: https://opendatacommons.org/licenses/dbcl/1-0/
+
+You are free to share, create works from, and adapt the database, provided you attribute, keep any
+adapted database open under the same terms, and do not use technical measures to restrict others.
+
+This follows the licence stack used by Exodus Privacy for its tracker database. The reciprocity
+matters here in a way it does not for the blocklists: the corpus exists because volunteers contributed
+observations about their own homes, and derivatives of it should stay open to the people who built it.
+
+## Curated source data
+
+The files under `data/endpoints/`, `data/hardcoded/`, `data/packages/` and `data/devices.yml` are
+curated documentation rather than a crowdsourced database, and are covered by LICENSE-CONTENT
+(CC BY 4.0). The generated blocklists derived from them are CC0 as above.

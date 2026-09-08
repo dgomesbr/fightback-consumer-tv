@@ -1,0 +1,94 @@
+name: 💡 Feature request
+description: Suggest something the project should do that it does not do yet.
+title: "[Feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you write this up, two things that are usually a better fit:
+
+        - **Your TV or router is not covered?** Use the
+          [guide request](../issues/new?template=guide_request.yml) form.
+        - **Something is wrong or does not work?** Use the
+          [bug report](../issues/new?template=bug_report.yml) form.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the project?
+      options:
+        - A guide or article
+        - The blocklists
+        - The collector (reads your DNS logs, builds a report)
+        - The report schema or dataset
+        - The website
+        - The Android companion app (planned, phase 2)
+        - Project direction
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: |
+        Describe the situation, not the solution. Who is stuck, and on what?
+
+        The most persuasive version of this is a specific person with a specific device who cannot
+        get where they want to go with what we publish today.
+      placeholder: |
+        I have a Vizio TV. Your Vizio page correctly says there is nothing I can do on the device
+        beyond one setting, and sends me to the router page. But I rent, my ISP router will not let
+        me change DNS, and I cannot put a box in front of it. The router page has no branch for me.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like us to do?
+      placeholder: |
+        A section in the ISP gateway guide for people who cannot replace or configure their router at
+        all, covering per-device DNS where it exists and what to do about Roku, which has no DNS
+        field.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried, or what else could work?
+      description: Including "nothing, I do not know where to start", which is useful information.
+
+  - type: dropdown
+    id: help
+    attributes:
+      label: Would you be willing to work on this?
+      description: No obligation. It helps us know whether to keep it open or scope it for someone else.
+      options:
+        - "I could write or test it with some guidance"
+        - "I could test it on my hardware but not write it"
+        - "I can provide the technical detail but not the prose"
+        - "No, I am suggesting it for someone else to pick up"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Things we will decline, so you do not waste your time
+
+        - **Exploit code, root procedures, or firmware patches.** Tier 4 of each guide explains what
+          root achieves and links upstream. Reproducing the steps here changes what this repository
+          is. See [LEGAL.md](../blob/main/LEGAL.md).
+        - **Anything that decrypts traffic or bypasses certificate pinning.** Out of scope by design.
+        - **Collecting more identifying data**, however useful it would be for analysis. The
+          never-collect list in [PRIVACY.md](../blob/main/PRIVACY.md) is not negotiable.
+        - **A hosted submission endpoint**, for now. Pull requests cost us nothing to run, hold no
+          user data, and leave a public audit trail. We will revisit if the friction becomes the
+          bottleneck.
+        - **Duplicating HaGeZi.** Their per-vendor lists are excellent and rebuilt daily. We add
+          annotation, per-model evidence and freshness, not more domains for their own sake.

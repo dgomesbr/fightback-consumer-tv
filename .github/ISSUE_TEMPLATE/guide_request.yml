@@ -1,0 +1,139 @@
+name: 📺 My TV or router is not covered
+description: Ask for a guide for hardware we have not written up yet.
+title: "[Guide] "
+labels: ["guide-request", "needs-research"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We would rather write a guide for hardware someone actually owns than guess at what is
+        popular. Tell us what you have.
+
+        **Check first:** many brands are just a badge on someone else's operating system. A TCL might
+        run Roku, Google TV or VIDAA depending on the model and where you bought it. Look under
+        Settings > About and see whether [the index](../blob/main/guides/README.md) already covers
+        that platform.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is missing?
+      options:
+        - A television or streaming device
+        - A router or firewall
+        - A DNS resolver or blocking service
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Brand and exact model
+      placeholder: Panasonic TX-55MZ2000B, or Netgear Nighthawk RAX50
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: What operating system does it run?
+      description: |
+        For a TV, look under Settings > About or the boot splash screen. Common answers are webOS,
+        Tizen, Roku OS, Fire OS, Google TV, Android TV, VIDAA, SmartCast, Titan OS, My Home Screen,
+        tvOS. Say "I do not know" if it is not obvious.
+      placeholder: My Home Screen 8.0
+    validations:
+      required: true
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware or software version
+      placeholder: 4.105
+    validations:
+      required: false
+
+  - type: input
+    id: region
+    attributes:
+      label: Country you bought it in
+      description: Country only. The same model number often ships a different OS in a different market.
+      placeholder: Germany
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### What you can already see
+
+        Answering these turns a request into most of the research. Skip any you cannot check.
+
+  - type: dropdown
+    id: dns_field
+    attributes:
+      label: Can you set a DNS server on the device itself?
+      description: |
+        Look for Network settings, then something like IP Settings, Manual, Static or Advanced. Note
+        whether you have to fill in an IP address and gateway too, or whether DNS is a field on its
+        own.
+      options:
+        - "Yes, DNS is its own setting (no static IP needed)"
+        - "Yes, but only if I set a static IP address as well"
+        - "No, there is no DNS field anywhere"
+        - "I could not find the network settings"
+    validations:
+      required: true
+
+  - type: textarea
+    id: menu
+    attributes:
+      label: The exact menu path, in the words on your screen
+      description: |
+        This is the single most useful thing in this form. Vendor documentation is frequently wrong
+        or missing, and we mark every path in our guides as verified or unverified based on reports
+        like yours.
+      placeholder: |
+        DNS:
+        Settings > Network > Network Settings > IP Address/DNS Settings > DNS Settings Mode > Manual
+
+        Privacy or tracking settings I could find:
+        Settings > Privacy > Personalised advertising
+    validations:
+      required: false
+
+  - type: textarea
+    id: privacy_settings
+    attributes:
+      label: What privacy or advertising settings does it have?
+      description: |
+        List what you see, in the words on screen. Content recognition hides under many names: Live
+        Plus, Viewing Information Services, Use Info From TV Inputs, Samba Interactive TV, Viewing
+        Data, Smart TV Experience, Personalised Ads.
+      placeholder: |
+        - Personalised advertising (on by default)
+        - Viewing data (on by default)
+        - Voice control
+
+  - type: dropdown
+    id: help
+    attributes:
+      label: Can you test instructions on this hardware?
+      description: |
+        We can research a guide, but somebody has to confirm the menu paths on a real device before
+        we mark them verified.
+      options:
+        - "Yes, I can test and report back"
+        - "Yes, but only settings changes, nothing advanced"
+        - "No"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I checked the guides index and this platform is not already covered under a different brand
+          required: true

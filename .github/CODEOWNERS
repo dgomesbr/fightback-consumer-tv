@@ -1,0 +1,13 @@
+# Default
+*                       @dgomesbr
+
+# Privacy-critical. Changes here need review even when they look trivial,
+# because a redaction bug is a data incident rather than a bug.
+/data/schema/           @dgomesbr
+/collector/             @dgomesbr
+/PRIVACY.md             @dgomesbr
+/LEGAL.md               @dgomesbr
+/SECURITY.md            @dgomesbr
+
+# Generated. Edit data/endpoints/ instead.
+/blocklists/            @dgomesbr

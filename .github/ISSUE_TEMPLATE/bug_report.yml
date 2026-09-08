@@ -1,0 +1,119 @@
+name: 🐞 Something is wrong
+description: A menu path that does not exist, an instruction that fails, a blocklist entry that broke your TV, or a bug in our tools.
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Corrections from people who own the hardware are the most useful
+        contributions this project gets.
+
+        **If a blocklist entry of ours broke your TV**, say so in the first box and we will treat it
+        as urgent. A list that breaks a device does more harm than the tracking it prevents.
+
+        **If you found a vulnerability in a television**, stop and read
+        [SECURITY.md](../blob/main/SECURITY.md) instead. Do not post it here.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem is it?
+      options:
+        - A menu path in a guide does not match my TV
+        - An instruction did not work
+        - A blocklist entry broke something on my TV
+        - Our collector or tooling errored
+        - The website is broken
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you got instead.
+      placeholder: |
+        I followed the Tier 0 steps in the LG guide. The guide says
+        Settings > All Settings > General > System > Additional Settings > Live Plus,
+        but on my TV there is no "Additional Settings" under System. Live Plus is
+        under General > Additional Settings instead.
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: Which page or file?
+      description: Paste the URL or the path in the repo.
+      placeholder: guides/vendors/lg-webos.md, Tier 0 section
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Your device
+
+        We ask for model and firmware because vendors move settings between versions and between
+        regions. Without them we cannot scope the fix, and we would end up breaking the guide for
+        someone else.
+
+  - type: input
+    id: model
+    attributes:
+      label: Exact model number
+      description: Usually on a sticker on the back, or under Settings > Support > About.
+      placeholder: OLED55C34LA
+    validations:
+      required: true
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware or software version
+      description: Under Settings > Support > About, or Settings > About > Build.
+      placeholder: 03.30.55 (webOS 23)
+    validations:
+      required: true
+
+  - type: input
+    id: region
+    attributes:
+      label: Country
+      description: Country only, please. Content recognition and menu layouts differ by jurisdiction.
+      placeholder: United Kingdom
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct
+    attributes:
+      label: Do you know the correct answer?
+      description: If you found the right menu path or the working command, put it here and we will credit you.
+      placeholder: |
+        The correct path on webOS 23 is:
+        Settings > All Settings > General > Additional Settings > Live Plus
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error output, if any
+      description: |
+        For tooling bugs. **Read it before pasting.** Remove IP addresses, MAC addresses, your Wi-Fi
+        network name, and the hostnames of your other devices.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: I removed IP addresses, MAC addresses, network names and other device hostnames from anything I pasted
+          required: true
+        - label: This is not a vulnerability in a television (those go through SECURITY.md)
+          required: true

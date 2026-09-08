@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Vulnerability in a television
+    url: https://github.com/dgomesbr/fightback-consumer-tv/blob/main/SECURITY.md
+    about: Do not open an issue. Report to the vendor first, then talk to us. Read this.
+  - name: 🛡️ Vulnerability in our own code
+    url: https://github.com/dgomesbr/fightback-consumer-tv/security/advisories/new
+    about: Private security advisory. Use this for anything that makes the collector leak data it should redact.
+  - name: 💬 Questions and general discussion
+    url: https://github.com/dgomesbr/fightback-consumer-tv/discussions
+    about: Not sure which platform your TV runs, or what to do first? Ask here. No question is too basic.
+  - name: 📖 Start here
+    url: https://dgomesbr.github.io/fightback-consumer-tv/
+    about: New to this? The five-minute version, no hardware needed.

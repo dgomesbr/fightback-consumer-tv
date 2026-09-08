@@ -1,0 +1,212 @@
+name: 📡 New report - what my TV contacts
+description: Submit the endpoints your television or streaming device talks to, so we can improve the blocklists and the per-model pages.
+title: "[Report] "
+labels: ["device-report", "needs-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is how the dataset grows. Every report makes the blocklists better for people who own
+        the same model as you.
+
+        ### Read this first
+
+        **Do not paste a raw log file or a packet capture.** Your Pi-hole and AdGuard Home logs
+        contain the IP address of every device in your house and the hostnames you gave them. We
+        cannot accept them and we will close the issue.
+
+        **The easier route is the collector**, which strips all of that for you and shows you the
+        file before anything is sent:
+
+        ```bash
+        python collector/router/fightback.py --source pihole --device "LG OLED C3" --preview
+        ```
+
+        Add `--submit` and it opens a pull request. If you would rather not use the command line,
+        fill in this form instead and paste only the hostnames.
+
+        See [PRIVACY.md](../blob/main/PRIVACY.md) for exactly what we collect and what we refuse to.
+
+  - type: markdown
+    attributes:
+      value: "---\n### Your device"
+
+  - type: dropdown
+    id: vendor
+    attributes:
+      label: Brand
+      options:
+        - LG
+        - Samsung
+        - Roku (or a Roku TV from TCL, Hisense, Philips, Sharp)
+        - Amazon Fire TV (or Insignia, Toshiba, Panasonic)
+        - Sony
+        - TCL
+        - Hisense
+        - Vizio
+        - Philips
+        - Panasonic
+        - Sharp
+        - Xiaomi
+        - Apple TV
+        - Nvidia Shield
+        - Google Chromecast or TV Streamer
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Exact model number
+      placeholder: OLED55C34LA
+    validations:
+      required: true
+
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware or software version
+      placeholder: 03.30.55 (webOS 23)
+    validations:
+      required: true
+
+  - type: input
+    id: region
+    attributes:
+      label: Country
+      description: Country only. Never city or postcode.
+      placeholder: United Kingdom
+    validations:
+      required: true
+
+  - type: input
+    id: locale
+    attributes:
+      label: TV menu language
+      placeholder: English
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### Settings state
+
+        This is the most valuable field in the whole report. The 2024 academic study found that
+        opting out genuinely stops content recognition traffic. Every report that records the
+        setting state lets us verify that independently, per model and per firmware.
+
+  - type: dropdown
+    id: acr
+    attributes:
+      label: Was content recognition turned off when you captured this?
+      description: |
+        Called Live Plus on LG, Viewing Information Services on Samsung, Use Info From TV Inputs on
+        Roku, Samba Interactive TV on Sony, Viewing Data on Vizio.
+      options:
+        - "Off (I opted out)"
+        - "On (default, I did not opt out)"
+        - "There is no such setting on this device"
+        - "I do not know"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: signed_in
+    attributes:
+      label: Were you signed in to a vendor account?
+      options:
+        - "No"
+        - "Yes"
+        - "I do not know"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### What you observed
+
+  - type: dropdown
+    id: method
+    attributes:
+      label: How did you capture this?
+      options:
+        - Pi-hole query log
+        - AdGuard Home query log
+        - NextDNS log
+        - Router DNS log (dnsmasq, Unbound, other)
+        - Packet capture (tcpdump, Wireshark, PCAPdroid)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scenario
+    attributes:
+      label: What was the TV doing?
+      description: We use the scenario taxonomy from the IMC 2024 study so results compare across research.
+      options:
+        - Idle (on, nothing playing)
+        - Broadcast or cable TV
+        - Free ad-supported channels (LG Channels, Samsung TV Plus, Pluto)
+        - A streaming app (Netflix, YouTube, Prime Video)
+        - HDMI input only (used as a plain monitor)
+        - Screen casting
+        - Standby or apparently off
+        - Mixed or normal daily use
+    validations:
+      required: true
+
+  - type: textarea
+    id: hostnames
+    attributes:
+      label: Hostnames it contacted
+      description: |
+        One per line. A count after the hostname helps if you have it.
+
+        **Redact identifiers.** If a hostname contains a long random-looking string, replace it with
+        `{id}`. For example `3f2504e0-4f89-11d3.metrics.example.com` becomes
+        `{id}.metrics.example.com`. That string is unique to your household and we do not want it.
+      placeholder: |
+        eu-acr3.alphonso.tv  1420
+        ad.lgsmartad.com  318
+        {id}.metrics.example.com  27
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: broke
+    attributes:
+      label: Did blocking any of these break something?
+      description: |
+        This is what makes our lists different from every other list. If blocking a domain killed the
+        app store, subtitles, the TV guide, firmware updates or an app, name the domain and what
+        broke.
+      placeholder: |
+        Blocking ngfts.lge.com made all the thumbnails in the LG Content Store disappear.
+        Blocking time.samsungcloudsolution.com stopped YouTube from starting.
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Keep it short and factual. Do not include network names or other devices.
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Confirmations
+      options:
+        - label: This is my own device on my own network
+          required: true
+        - label: I have removed IP addresses, MAC addresses, serial numbers, my Wi-Fi network name, and the hostnames of my other devices
+          required: true
+        - label: I have not pasted a raw log file or packet capture
+          required: true
+        - label: I understand this data will be published under ODbL 1.0 once five separate contributors have reported the same endpoints
+          required: true

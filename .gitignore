@@ -1,0 +1,36 @@
+# Node
+node_modules/
+dist/
+.astro/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Collector output: reports live here before you choose to submit them.
+# Never commit them by accident.
+collector/out/
+*.report.json
+*.report.ndjson
+
+# Never commit raw logs or captures. They contain client IP addresses and
+# the hostnames of other devices on your network. See PRIVACY.md.
+*.pcap
+*.pcapng
+*.har
+querylog*.json
+pihole-FTL.db
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
