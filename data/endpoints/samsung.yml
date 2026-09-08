@@ -1,0 +1,316 @@
+# Samsung Tizen endpoints
+#
+# Samsung's never-block list is the longest of any vendor and the entries are load-bearing.
+# Blocking time.samsungcloudsolution.com alone breaks Plex, YouTube and Prime Video.
+
+vendor: samsung
+platform: tizen
+updated: 2026-09-08
+
+entries:
+  # ---------------------------------------------------------------- content recognition
+  # In-house rather than a third party. Frames sampled every 500 ms, sent about every
+  # minute, peaking every five minutes.
+  - domain: samsungacr.com
+    wildcard: true
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/html/2409.06203v1
+    notes: >-
+      Covers log-config, log-ingestion (US), log-ingestion-eu (EU and UK), log-1, log-2,
+      log-3 and targeted-config-test.
+  - domain: samsungcloud.tv
+    wildcard: false
+    regex: '^acr-[a-z]{2}-prd\.samsungcloud\.tv$'
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/html/2409.06203v1
+    notes: >-
+      Regional endpoints acr-us-prd, acr-eu-prd, acr-au-prd, acr-br-prd, acr-ca-prd,
+      acr-in-prd, acr-kr-prd, acr-mx-prd, acr-nz-prd. Scoped by regex so the rest of
+      samsungcloud.tv is untouched.
+  - domain: acr0.samsungcloudsolution.com
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/html/2409.06203v1
+    notes: >-
+      Note the numbered prefix. Sibling hosts are plausible, which is why the collector
+      normalises numeric shard suffixes to {n} rather than treating them as identifiers.
+
+  # ---------------------------------------------------------------- advertising
+  - domain: samsungads.com
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: samsungtvads.com
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+  - domain: samsungadhub.com
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: samsungads.adsmeasurement.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+  - domain: samsungtv-d.openx.net
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: tvx.adgrx.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- device telemetry
+  - domain: samsungelectronics.com
+    wildcard: false
+    regex: '^[a-z]pu\.samsungelectronics\.com$'
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      The single-letter "pu" cluster: apu, bpu, cpu, dpu, kpu, upu, xpu, ypu, zpu.
+      Scoped by regex because samsungelectronics.com itself is a corporate site.
+  - domain: nmetrics.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/samsung
+  - domain: smetrics.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+  - domain: event-tracking.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+  - domain: atlas.samsung.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+    notes: Covers dc.di, dls-account.di and regi.di.
+  - domain: runestone.samsung.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+    notes: Covers dc.di, dls.di and api.
+  - domain: bigdata.ssp.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/samsung
+  - domain: analytics.bigdata.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+  - domain: insights.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/samsung
+  - domain: devicelog.samsungcloudsolution.net
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+  - domain: samsungdm.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+    notes: Diagnostic monitoring. Covers diagmon-policy, diagmon-serviceapi and report.gras.
+  - domain: dc.dqa.samsung.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+
+  # ---------------------------------------------------------------- third-party marketing stack
+  - domain: demdex.net
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+    notes: Adobe Audience Manager. HaGeZi's Samsung list carries 31 hosts under this domain.
+  - domain: omtrdc.net
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+    notes: Adobe Analytics. 15 hosts in HaGeZi's Samsung list.
+  - domain: useinsider.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+    notes: 30 hosts under api.useinsider.com in HaGeZi's Samsung list.
+  - domain: connecttv.pelmorex.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: Tracking inside the built-in weather app. The app itself may stop working.
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.samsung-onlydomains.txt
+
+  # ---------------------------------------------------------------- platform, mixed
+  - domain: internetat.tv
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Covers log., game. and sso.
+  - domain: samsungrm.net
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: samsungyosemite.com
+    wildcard: true
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: api-hub, us-api, eu-api, uk-api. Purpose not established.
+
+  # ---------------------------------------------------------------- never block
+  - domain: time.samsungcloudsolution.com
+    purpose: ntp
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      Plex, YouTube and Prime Video stop working on some sets. The TV loses time
+      synchronisation, and apps that validate certificates fail as a result.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: auth.samsungosp.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Samsung account authentication fails.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: infolink.pavv.co.kr
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The app store and login stop working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: lcprd1.samsungcloudsolution.net
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Smart Hub and the app store stop working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: configprd.samsungcloudsolution.net
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: cdn.samsungcloudsolution.com
+    purpose: cdn
+    tier: never
+    safe_to_block: false
+    breaks: Update checks fail. Reported on UE40F5500.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: samsungotn.net
+    wildcard: true
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates fail. Reported on UE49KS7000 and QE55Q9FNA.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: otn.samsungcloudcdn.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates fail.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: samsungcloudsolution.net
+    wildcard: false
+    regex: '^otnprd([89]|1[01])\.samsungcloudsolution\.net$'
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates fail.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: otnprd8 through otnprd11.
+  - domain: osb-ussvc.samsungqbe.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Samsung TV Plus stops working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: gpm.samsungqbe.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: ns11.whois.co.kr
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Series 7 sets cannot open YouTube.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      A third-party Korean nameserver being load-bearing for YouTube on a Samsung TV is
+      not something anyone would guess. This is why the never-block list exists.
+  - domain: multiscreen.samsung.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Screen mirroring and second-screen features stop working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt

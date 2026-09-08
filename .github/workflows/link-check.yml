@@ -1,0 +1,126 @@
+name: Link check
+
+# Vendor support pages move constantly, and a guide full of dead citations is worth less than
+# no guide. This runs weekly rather than only on pull requests, because links rot on their own
+# schedule.
+#
+# Internal links fail the build. External links are reported but do not, since a vendor having
+# a bad day should not block someone correcting a menu path.
+
+on:
+  pull_request:
+    paths:
+      - "guides/**"
+      - "*.md"
+      - ".github/workflows/link-check.yml"
+  schedule:
+    # Weekly, at an off-peak minute rather than on the hour.
+    - cron: "37 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  internal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Relative links resolve
+        run: |
+          python - <<'PY'
+          import re, sys
+          from pathlib import Path
+
+          # Markdown inline links and reference definitions, minus anything absolute or a
+          # mailto. The refdef pattern excludes labels starting with ^, which are footnote
+          # definitions rather than link definitions: `[^1]: Some text` would otherwise be
+          # read as a link to "Some".
+          inline = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
+          refdef = re.compile(r"^\[(?!\^)[^\]]+\]:\s*(\S+)", re.M)
+
+          broken = []
+          checked = 0
+          for md in sorted(Path(".").rglob("*.md")):
+              if "node_modules" in md.parts or "site/dist" in str(md):
+                  continue
+              text = md.read_text(encoding="utf-8", errors="replace")
+              for target in inline.findall(text) + refdef.findall(text):
+                  if target.startswith(("http://", "https://", "mailto:", "#")):
+                      continue
+                  # Strip an anchor, and skip GitHub's ../../issues style shortcuts, which
+                  # only resolve on github.com and not on disk.
+                  path_part = target.split("#", 1)[0]
+                  if not path_part or "/issues/" in path_part or "/security/" in path_part:
+                      continue
+                  checked += 1
+                  resolved = (md.parent / path_part).resolve()
+                  if not resolved.exists():
+                      broken.append(f"{md}: {target}")
+
+          print(f"checked {checked} relative links")
+          if broken:
+              print(f"::error::{len(broken)} broken relative link(s):")
+              for b in broken:
+                  print(f"  {b}")
+              sys.exit(1)
+          PY
+
+      - name: Every cited source is a real URL
+        run: |
+          python -m pip install --quiet pyyaml
+          python - <<'PY'
+          import re, sys
+          from pathlib import Path
+          import yaml
+
+          # Every endpoint and package entry must carry a source that looks like a URL. The
+          # generator enforces this for endpoints; this also covers the package files.
+          bad = []
+          for path in sorted(Path("data").rglob("*.yml")):
+              doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+              for key in ("entries", "packages"):
+                  for item in doc.get(key) or []:
+                      src = item.get("source")
+                      name = item.get("domain") or item.get("package") or "?"
+                      if not src:
+                          bad.append(f"{path.name}: {name} has no source")
+                      elif not str(src).startswith("http"):
+                          bad.append(f"{path.name}: {name} source is not a URL: {src}")
+          if bad:
+              print("::error::entries without a usable source:")
+              for b in bad:
+                  print(f"  {b}")
+              sys.exit(1)
+          print("every entry carries a source URL")
+          PY
+
+  external:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check external links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            --max-concurrency 4
+            --timeout 25
+            --retry-wait-time 4
+            --max-retries 2
+            --accept 200,206,301,302,403,429
+            --exclude-path site/node_modules
+            --exclude-path site/dist
+            './**/*.md'
+          fail: false
+          output: lychee.md
+      - name: Summary
+        if: always()
+        run: cat lychee.md >> "$GITHUB_STEP_SUMMARY" || true

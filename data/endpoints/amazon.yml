@@ -1,0 +1,241 @@
+# Amazon Fire OS endpoints
+#
+# PETS 2021 found Fire TV had 11 blockable non-required destinations, the highest of any
+# device tested, and that it requires only api.amazon.com, unagi-eu.amazon.com and
+# youtube.com. Note that api.amazon.com appears on both their required and non-required
+# lists because it multiplexes, so it must not be blocked.
+
+vendor: amazon
+platform: fire-os
+updated: 2026-09-08
+
+entries:
+  # ---------------------------------------------------------------- advertising
+  - domain: amazon-adsystem.com
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: >-
+      Ad breaks in ad-supported apps may stall rather than skip. Freevee and some
+      third-party channels are affected.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+    notes: >-
+      HaGeZi's Amazon list carries roughly 189 hosts under this domain. Covers aax-ott,
+      aax-us-ott, aax-us-east-1-ott, aax-eu, aax-dtb-cf. PETS 2021 classified aax-eu as
+      non-required.
+  - domain: mads.amazon.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+  - domain: mads-eu.amazon.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+  - domain: mads-fe.amazon.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+
+  # ---------------------------------------------------------------- device metrics
+  - domain: device-metrics-us.amazon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/abs/2105.05162
+    notes: Classified non-required by PETS 2021. Also in the NextDNS alexa list.
+  - domain: device-metrics-us-2.amazon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/alexa
+  - domain: device-metrics-us-ud.amazon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+  - domain: mobileanalytics.us-east-1.amazonaws.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+    notes: >-
+      A specific host under amazonaws.com. Never wildcard amazonaws.com: Perflyst warns
+      of collateral damage because device push messaging runs on shared AWS space.
+  - domain: minerva.devices.a2z.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+    notes: Minerva is Amazon's metrics pipeline. The on-device package is com.amazon.minerva.client.api.
+  - domain: forester.a2z.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+  - domain: federatedanalytics.amazon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+  - domain: amazon.com
+    wildcard: false
+    regex: '^fls-(na|eu|fe)\.amazon\.[a-z.]+$'
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+    notes: >-
+      Clickstream collection across roughly 25 country domains. Scoped by regex, since
+      amazon.com itself is obviously never blockable.
+  - domain: mas-sdk.amazon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/abs/2105.05162
+    notes: >-
+      Classified non-required by PETS 2021. Note the near-miss with mas-ext.amazon.com,
+      which is required for app installs and is on the never-block list below.
+  - domain: msh.amazon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/abs/2105.05162
+  - domain: d3p8zr0ffa9t17.cloudfront.net
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+  - domain: device-messaging-na.amazon.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: Push messaging to the device may stop.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+
+  # ---------------------------------------------------------------- Prime Video ad delivery
+  - domain: aiv-cdn.net
+    wildcard: false
+    regex: '^s3-[a-z]{3}-ww\.cf\.videorolls\.row\.aiv-cdn\.net$'
+    purpose: ads
+    tier: aggressive
+    safe_to_block: true
+    breaks: Prime Video ad breaks may stall rather than skip.
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+  - domain: sonar.prime-video.amazon.dev
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.amazon-onlydomains.txt
+
+  # ---------------------------------------------------------------- third party on Fire TV
+  - domain: config.ioam.de
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://perflyst.github.io/PiHoleBlocklist/AmazonFireTV.txt
+  - domain: secure-eu.imrworldwide.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://perflyst.github.io/PiHoleBlocklist/AmazonFireTV.txt
+    notes: Nielsen audience measurement.
+  - domain: settings.crashlytics.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://perflyst.github.io/PiHoleBlocklist/AmazonFireTV.txt
+
+  # ---------------------------------------------------------------- never block
+  - domain: api.amazon.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      The device stops working. PETS 2021 lists this as required, and it also appears on
+      their non-required list because it multiplexes both kinds of traffic. Multiplexed
+      hosts cannot be blocked at DNS level without collateral damage.
+    source: https://arxiv.org/abs/2105.05162
+  - domain: unagi-eu.amazon.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The device stops working. Classified required by PETS 2021.
+    source: https://arxiv.org/abs/2105.05162
+  - domain: mas-ext.amazon.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Apps cannot be installed.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+  - domain: amazonadsi-a.akamaihd.net
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: App installation and updates fail.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+    notes: >-
+      The name looks like an ad host and it is not. This entry exists to stop people
+      pattern-matching on "adsi" and breaking their app store.
+  - domain: softwareupdates.amazon.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates fail.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+    notes: >-
+      People rooting a Fire TV Stick deliberately block this and two related hosts during
+      setup so the device does not update past a vulnerable build. That is a considered
+      choice, not a default we ship.
+  - domain: ftv-smp.ntp-fireos.com
+    purpose: ntp
+    tier: never
+    safe_to_block: false
+    breaks: The clock drifts and certificate validation starts failing.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+  - domain: 2.android.pool.ntp.org
+    purpose: ntp
+    tier: never
+    safe_to_block: false
+    breaks: The clock drifts and certificate validation starts failing.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+  - domain: amazonalexa.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Alexa voice control stops working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/AmazonFireTV.txt
+    notes: Covers api. and avs.eu. Block it deliberately if you do not want voice.
+  - domain: amazonaws.com
+    wildcard: true
+    purpose: cdn
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      Wide collateral damage. Perflyst warns that device push messaging uses per-device
+      certificates on shared AWS address space, so a blanket block takes out unrelated
+      services.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Guard entry. Specific hosts under this domain are listed individually above.

@@ -1,0 +1,239 @@
+# Amazon Fire OS preinstalled packages
+#
+# On Fire OS always use pm disable-user, never pm uninstall. Disabling is reversible with
+# pm enable. Uninstalling is not, short of a factory reset.
+#
+# The tension to understand before starting: the metrics packages are both the most
+# valuable to disable and among the most likely to break the Settings interface on specific
+# builds. The `breaks_on` field records the exact Fire OS version where breakage was
+# observed, because the same package is harmless on other builds.
+
+platform: fire-os
+updated: 2026-09-08
+
+packages:
+  # ================================================================ metrics and telemetry
+  - package: com.amazon.device.metrics
+    label: Amazon Device Metrics
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.device.logmanager
+    label: Log Manager
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.device.crashmanager
+    label: Crash Manager
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.tv.fw.metrics
+    label: Frameworks Metrics
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.wirelessmetrics.service
+    label: Wireless Metrics
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.dp.logger
+    label: Amazon logger
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.minerva.client.api
+    label: Minerva metrics client
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+    notes: Minerva is the pipeline behind minerva.devices.a2z.com in data/endpoints/amazon.yml.
+  - package: com.fireos.usagestats.proxy
+    label: Usage Stats Map Proxy
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.connectivitydiag
+    label: Connectivity diagnostics
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.android.service.networkmonitor
+    label: Network monitor
+    purpose: telemetry
+    safe: true
+    breaks: null
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+
+  # ================================================================ advertising and home screen
+  - package: com.amazon.videoads.app
+    label: Video Ads
+    purpose: ads
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.hedwig
+    label: Fire TV Channels
+    purpose: ads
+    safe: true
+    breaks: The Fire TV Channels row disappears from the home screen.
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.ftv.glorialist
+    label: Home screen content list
+    purpose: ads
+    safe: true
+    breaks: Sponsored rows on the home screen stop populating.
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.firespotlight
+    label: Appstore Spotlight
+    purpose: ads
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.advertisingidsettings
+    label: Advertising ID settings
+    purpose: ads
+    safe: true
+    breaks: >-
+      The advertising ID settings screen disappears. Turn the setting off in Tier 0 before
+      disabling this, or you lose the ability to change it.
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.hybridadidservice
+    label: Hybrid Ad ID service
+    purpose: ads
+    safe: true
+    breaks: null
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.kindle.kso
+    label: Special Offers
+    purpose: ads
+    safe: true
+    breaks: null
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+
+  # ================================================================ launcher, conditional
+  - package: com.amazon.tv.launcher
+    label: Fire TV launcher
+    purpose: ads
+    safe: conditional
+    requires: "A replacement launcher installed first, for example Wolf Launcher or FLauncher"
+    breaks: Without a replacement launcher the device has no home screen.
+    source: https://github.com/emtee40/root_firestick
+    notes: The sponsored home-screen content lives here, which is why people replace it.
+  - package: com.amazon.firehomestarter
+    label: Home screen starter
+    purpose: ads
+    safe: conditional
+    requires: "A replacement launcher installed first"
+    breaks: Without a replacement launcher the device has no home screen.
+    source: https://github.com/emtee40/root_firestick
+
+  # ================================================================ update suppression
+  - package: com.amazon.device.software.ota
+    label: Over-the-air updates
+    purpose: ota
+    safe: conditional
+    breaks: >-
+      Firmware updates stop, including security fixes. Only do this if you have decided you
+      want to stay on a specific build, and understand you are declining security patches.
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+  - package: com.amazon.tv.forcedotaupdater.v2
+    label: Forced update
+    purpose: ota
+    safe: conditional
+    breaks: Firmware updates stop, including security fixes.
+    source: https://github.com/mrhaydendp/Fire-Tools/blob/main/Fire-Tools/Debloat.txt
+
+  # ================================================================ never disable
+  - package: com.amazon.client.metrics
+    label: Client metrics
+    purpose: telemetry
+    safe: false
+    breaks: The Settings interface stops working.
+    breaks_on: "Fire OS 5.2.6.3"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+    notes: >-
+      Reads like an obvious removal and is not. This is the clearest example of why metrics
+      packages need version gating.
+  - package: com.amazon.client.metrics.api
+    label: Client metrics API
+    purpose: telemetry
+    safe: false
+    breaks: The Settings interface stops working.
+    breaks_on: "Fire OS 5.2.6.3"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.metrics.api
+    label: Metrics API
+    purpose: telemetry
+    safe: false
+    breaks: The Settings interface stops working.
+    breaks_on: "Fire OS 5.2.6.3"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.device.settings.sdk.internal.library
+    label: Device settings SDK
+    purpose: functional
+    safe: false
+    breaks: The Device and Applications settings screens stop opening.
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: amazon.jackson19
+    label: Jackson platform library
+    purpose: functional
+    safe: false
+    breaks: The Display and Applications settings screens stop opening.
+    breaks_on: "Fire OS 5.2.7.2"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.application.compatibility.enforcer
+    label: Application compatibility enforcer
+    purpose: functional
+    safe: false
+    breaks: Documented as required on this build.
+    breaks_on: "Fire OS 5.2.7.2"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.identity.auth.device.authorization
+    label: Amazon identity authorization
+    purpose: functional
+    safe: false
+    breaks: Amazon sign-in fails, and so do third-party logins including Netflix.
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.imp
+    label: Initial media provisioning
+    purpose: functional
+    safe: false
+    breaks: Applications and sign-in stop working.
+    breaks_on: "Fire OS 5.2.6.3"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.tv.oobe
+    label: Out of box experience
+    purpose: functional
+    safe: false
+    breaks: Applications and sign-in stop working.
+    breaks_on: "Fire OS 5.2.6.3"
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.communication.discovery
+    label: Communication discovery
+    purpose: functional
+    safe: false
+    breaks: Produces continuous errors.
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.device.controllermanager
+    label: Controller manager
+    purpose: functional
+    safe: false
+    breaks: Remote and game controller input may stop working.
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh
+  - package: com.amazon.fireinputdevices
+    label: Fire input devices
+    purpose: functional
+    safe: false
+    breaks: Remote input may stop working.
+    source: https://github.com/esc0rtd3w/firestick-loader/blob/master/scripts/debloat/bloat-disable-noroot.sh

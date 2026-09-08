@@ -1,0 +1,284 @@
+# LG webOS endpoints
+#
+# Format is documented in data/endpoints/README.md.
+# tier: core       safe to block, does not break documented device function
+#       aggressive blocks something people may want, labelled in the output
+#       never      breaks core function, asserted in CI to be absent from every generated list
+#
+# Every entry needs a source. Every entry needs a `breaks` value, including `unknown`.
+
+vendor: lg
+platform: webos
+updated: 2026-09-08
+
+entries:
+  # ---------------------------------------------------------------- content recognition
+  # LG uses Alphonso, which it has owned since 2021. The recognition engine on device is
+  # ACRCloud, present in firmware as libacrcloud_recognizer.so. Frames are sampled every
+  # 10 ms, batched, and sent every 15 seconds.
+  - domain: alphonso.tv
+    wildcard: true
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/html/2409.06203v1
+    notes: >-
+      Regional endpoints observed as eu-acrX.alphonso.tv in the EU and UK and
+      tkacrX.alphonso.tv in the US, where X rotates. Wildcarding the registrable domain
+      covers the rotation.
+  - domain: lgads.tv
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://www.notebookcheck.net/LG-smart-TVs-caught-logging-audio-with-screen-off-and-snooping-on-local-devices.1391214.0.html
+    notes: LG Ad Solutions.
+
+  # ---------------------------------------------------------------- advertising
+  # Roughly 159 country-code hosts under lgsmartad.com and 163 mirrors under
+  # aws-prd.net. Use the pattern rather than enumerating them.
+  - domain: lgsmartad.com
+    wildcard: true
+    regex: '(^|\.)lgsmartad\.com'
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/regex.list
+  - domain: aws-prd.net
+    wildcard: false
+    regex: '(^|\.)[a-z]{2}-ad-lgsmartad-com\.aws-prd\.net$'
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.lgwebos-onlydomains.txt
+    notes: >-
+      AWS-side mirror of the country-code ad hosts. Scoped by regex so the rest of
+      aws-prd.net is untouched.
+  - domain: ad.lgappstv.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: ibis.lgappstv.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: us.ibs.lgappstv.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: yumenetworks.com
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Third-party video ad network.
+  - domain: smartclip.com
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Also serves HbbTV broadcaster trackers. Blocking the smartclip HbbTV hosts is
+      reported to break some European broadcaster apps, so this is not in the core tier
+      for anyone who uses broadcast catch-up apps.
+  - domain: lgad.cjpowercast.com.edgesuite.net
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- telemetry, home screen, nudges
+  - domain: cdpbeacon.lgtvcommon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Named in Perflyst's "Gamers Nexus - LG Smart TV spying" section as aic.cdpbeacon.
+  - domain: cdpsvc.lgtvcommon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Named in Perflyst's "Gamers Nexus - LG Smart TV spying" section as aic.cdpsvc.
+  - domain: rdl.lgtvcommon.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: nudge.lgtvcommon.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.lgwebos-onlydomains.txt
+    notes: Drives the promotional nudges on the home screen.
+  - domain: homeprv.lgtvcommon.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.lgwebos-onlydomains.txt
+  - domain: ads.lgtvcommon.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.lgwebos-onlydomains.txt
+  - domain: wiseconfig.lgtvcommon.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.lgwebos-onlydomains.txt
+    notes: Name suggests remote configuration. Not in core until someone confirms what it does.
+  - domain: recommend.lgtvcommon.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: Content recommendations on the home screen stop appearing.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: nextlgsdp.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    notes: >-
+      Service delivery platform telemetry. Covers us., ngfts., aic-gfts., rdx2., ibs.,
+      ibsstat. Enumerated from a rooted OLED65G5WUA and corroborated by Perflyst's
+      Gamers Nexus section.
+  - domain: rdx2.lgtvsdp.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    regex: '(^|\.)rdx2\.lgtvsdp\.com'
+  - domain: smartshare.lgtvsdp.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: tv.wiselg.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+  - domain: lggalleryplus.com
+    wildcard: true
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: The Gallery screensaver artwork may stop updating.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+
+  # ---------------------------------------------------------------- AI and voice
+  - domain: lgsmartweb.com
+    wildcard: true
+    purpose: telemetry
+    tier: never
+    safe_to_block: false
+    breaks: Voice search stops working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    notes: Natural language processing for voice. Blocking it disables the feature outright.
+
+  # ---------------------------------------------------------------- IoT
+  - domain: lgtviot.com
+    wildcard: true
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: ThinQ smart home integration and the LG mobile app stop working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+  - domain: lgthinq.com
+    wildcard: true
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: ThinQ smart home integration stops working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+
+  # ---------------------------------------------------------------- never block
+  - domain: ngfts.lge.com
+    purpose: cdn
+    tier: never
+    safe_to_block: false
+    breaks: Thumbnails stop loading in the LG Content Store.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Shares a name with the aic-ngfts and qt2-ngfts AI hosts, which is a trap. Do not
+      wildcard ngfts.lge.com.
+  - domain: lgtvsdp.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The LG Content Store stops working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    notes: >-
+      The rdx2 and smartshare subdomains are telemetry and are listed separately above.
+      Block those, not the parent.
+  - domain: lgappstv.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The LG Content Store stops working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    notes: The ad. and ibis. subdomains are listed separately above.
+  - domain: us.lgtvsdp.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Reported in Perflyst issue 117.
+    source: https://github.com/Perflyst/PiHoleBlocklist/issues/117
+  - domain: snu.lge.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates stop working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    notes: >-
+      The webOS Homebrew Channel deliberately blocks this and the three below when
+      webosbrew_block_updates is set, which is a considered choice by someone who has
+      rooted their TV. It is not a default we recommend.
+  - domain: su.lge.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates stop working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+  - domain: su-ssl.lge.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates stop working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+  - domain: nsu.lge.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates stop working.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178

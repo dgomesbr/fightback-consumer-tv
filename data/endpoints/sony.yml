@@ -1,0 +1,107 @@
+# Sony Bravia endpoints
+#
+# Sony runs Google TV or Android TV on all current models, so google.yml applies as well.
+# Sony's distinctive exposure is Samba TV, which is also the on-device package tv.samba.ssm.
+
+vendor: sony
+platform: google-tv
+updated: 2026-09-08
+
+entries:
+  # ---------------------------------------------------------------- content recognition
+  - domain: samba.tv
+    wildcard: true
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Covers api.cid, preferences.cid, platform.cid, events.cid, mtrcs and pixel.mtrcs.
+      Samba TV also supplies recognition on Toshiba and, through flingo.tv, on some
+      Philips sets.
+  - domain: flingo.tv
+    wildcard: true
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Another domain belonging to Samba TV.
+
+  # ---------------------------------------------------------------- telemetry
+  - domain: ndmdhs.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Covers api-mf1.meta, b02.black, bdcore-apr-lb.bda and the bravia-cfgdst hosts.
+  - domain: internet.sony.tv
+    wildcard: false
+    regex: '^([0-9a-f]{32}\.)?ssm[0-9]\.internet\.sony\.tv$'
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Perflyst records a per-device hexadecimal prefix on these hosts, which is exactly
+      the identifier-in-a-hostname pattern the collector redacts to {id}.
+  - domain: reg.biv.sony.tv
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: social.biv.sony.tv
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: call.me.sel.sony.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: sonybivstatic-a.akamaihd.net
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: facemap.foldlife.net
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- never block
+  - domain: applicast.ga.sony.net
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Applications stop working and the TV reports no internet connection.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: portal.store.sonyentertainmentnetwork.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Applications stop working and the TV reports no internet connection.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: update.biv.sony.tv
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Firmware updates fail.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: service.biv.sony.tv
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt

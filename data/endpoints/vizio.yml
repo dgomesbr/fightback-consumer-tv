@@ -1,0 +1,72 @@
+# Vizio SmartCast endpoints
+#
+# Vizio's recognition subsidiary is Inscape and the traffic runs over tvinteractive.tv.
+# Vizio owners have no device-level options beyond the Viewing Data toggle, so the router
+# is the only lever. See guides/vendors/vizio.md.
+
+vendor: vizio
+platform: smartcast
+updated: 2026-09-08
+
+entries:
+  - domain: tvinteractive.tv
+    wildcard: true
+    regex: '(\.|^)tvinteractive\.tv$'
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/regex.list
+    notes: >-
+      Covers control, control2, control-zoo-dai-default, control-zoo-dtsstage, mcp and
+      tvmeta-dynamic. This is Inscape, the subsidiary the FTC action concerned.
+  - domain: inscape.tv
+    wildcard: true
+    purpose: acr
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://github.com/GhostPortTechnologies/Ghostport-Phantom-OS/blob/main/etc/blocklists/acr-hosts.txt
+    notes: >-
+      Low-confidence source, and this may be a corporate site rather than a data endpoint.
+      Held out of the core tier for that reason.
+  - domain: tvmetrix.com
+    wildcard: true
+    purpose: acr
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://github.com/GhostPortTechnologies/Ghostport-Phantom-OS/blob/main/etc/blocklists/acr-hosts.txt
+  - domain: digitalhomeservices.yahoo.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Legacy Vizio smart platform.
+  - domain: widgets.yahoo.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- never block
+  - domain: api.vizio.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: SmartCast features stop working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: images.vizio.com
+    purpose: cdn
+    tier: never
+    safe_to_block: false
+    breaks: SmartCast artwork stops loading.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: vizio.pool.ntp.org
+    purpose: ntp
+    tier: never
+    safe_to_block: false
+    breaks: The clock drifts and certificate validation starts failing.
+    source: https://github.com/jrwren/hosts/blob/master/vizio

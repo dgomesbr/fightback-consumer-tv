@@ -1,0 +1,65 @@
+name: Validate reports
+
+# The privacy gate. A report that carries an address, a MAC, a serial or an unredacted
+# identifier must not reach the default branch, and review is not a reliable way to catch it.
+#
+# The self-test runs first and deliberately feeds bad input to the validator. If the checks
+# stop firing, the build fails before it ever looks at a real submission, so a broken
+# validator cannot silently pass everything.
+
+on:
+  pull_request:
+    paths:
+      - "data/reports/**"
+      - "data/schema/**"
+      - "collector/**"
+      - "tools/validate_reports.py"
+      - ".github/workflows/validate-reports.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/reports/**"
+      - "data/schema/**"
+      - "collector/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --quiet jsonschema pyyaml pytest
+
+      - name: Prove the redaction checks still fire
+        run: python tools/validate_reports.py --self-test
+
+      - name: Redaction unit tests
+        run: python -m pytest collector/router/tests -q
+
+      - name: Validate every submitted report
+        run: python tools/validate_reports.py
+
+      - name: Reject raw logs and captures
+        run: |
+          # These carry client addresses and the hostnames of other devices on a
+          # contributor's network. The collector reads them locally and never uploads them,
+          # so one appearing in a pull request means something went wrong.
+          found=$(git ls-files \
+            '*.pcap' '*.pcapng' '*.har' \
+            'data/reports/**/querylog*' 'data/reports/**/*.db' || true)
+          if [ -n "$found" ]; then
+            echo "::error::raw logs or packet captures must not be committed:"
+            echo "$found"
+            echo "See PRIVACY.md. The collector reads these locally and uploads only a report."
+            exit 1
+          fi
+          echo "no raw logs or captures committed"

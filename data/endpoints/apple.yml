@@ -1,0 +1,150 @@
+# Apple tvOS endpoints
+#
+# tvOS runs no content recognition. The exposure is analytics and Apple's own ad network,
+# which is a materially smaller surface than any other platform in this project. The
+# never-block list matters more here than the blocklist, because Apple's update, activation
+# and store hosts are easy to break by pattern-matching on names.
+
+vendor: apple
+platform: tvos
+updated: 2026-09-08
+
+entries:
+  - domain: metrics.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/apple
+  - domain: securemetrics.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: xp.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: tv-analytics-events.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: analytics-events.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: iadsdk.apple.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/apple
+  - domain: iad.apple.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: api-adservices.apple.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: searchads.apple.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: cstat.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+  - domain: diagnostics.apple.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.apple-onlydomains.txt
+
+  # ---------------------------------------------------------------- never block
+  - domain: mesu.apple.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Software updates fail.
+    source: https://support.apple.com/en-us/101555
+  - domain: gdmf.apple.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Software updates fail.
+    source: https://support.apple.com/en-us/101555
+  - domain: gs.apple.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: Software updates and activation fail.
+    source: https://support.apple.com/en-us/101555
+  - domain: albert.apple.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Device activation fails, which can leave a factory-reset Apple TV unusable.
+    source: https://support.apple.com/en-us/101555
+  - domain: itunes.apple.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The App Store and media playback stop working.
+    source: https://support.apple.com/en-us/101555
+  - domain: apps.apple.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The App Store stops working.
+    source: https://support.apple.com/en-us/101555
+  - domain: mzstatic.com
+    wildcard: true
+    purpose: cdn
+    tier: never
+    safe_to_block: false
+    breaks: App Store artwork stops loading.
+    source: https://support.apple.com/en-us/101555
+  - domain: ocsp.apple.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Certificate validation fails, which can break app launches.
+    source: https://support.apple.com/en-us/101555
+  - domain: valid.apple.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Certificate validation fails.
+    source: https://support.apple.com/en-us/101555
+  - domain: push.apple.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Push notifications and several system services stop working.
+    source: https://support.apple.com/en-us/101555
+  - domain: guzzoni.apple.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Siri stops working. Block it deliberately if you do not want Siri.
+    source: https://support.apple.com/en-us/101555

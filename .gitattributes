@@ -1,0 +1,11 @@
+# Normalise line endings so a Windows contributor and a Linux CI runner agree.
+* text=auto eol=lf
+
+# Generated. Collapse them in diffs so a data change is reviewable without scrolling past
+# a thousand regenerated lines.
+blocklists/** linguist-generated=true
+site/package-lock.json linguist-generated=true
+
+# Guides are the substance of this repository, so count them as documentation rather than
+# letting the language stats claim it is a Python project.
+guides/** linguist-documentation=false

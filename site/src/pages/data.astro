@@ -1,0 +1,322 @@
+---
+import fs from "node:fs";
+import path from "node:path";
+import YAML from "yaml";
+import Base from "../layouts/Base.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const repo = "https://github.com/dgomesbr/fightback-consumer-tv";
+const root = path.resolve(process.cwd(), "..");
+
+type Entry = {
+  domain: string;
+  purpose: string;
+  tier: string;
+  breaks: string | null;
+  source: string;
+  vendor?: string;
+};
+
+const files = fs
+  .readdirSync(path.join(root, "data", "endpoints"))
+  .filter((f) => f.endsWith(".yml"));
+
+const all: Array<Entry & { file: string; fileVendor: string }> = [];
+for (const f of files) {
+  const doc = YAML.parse(fs.readFileSync(path.join(root, "data", "endpoints", f), "utf8"));
+  for (const e of doc.entries ?? []) {
+    all.push({ ...e, file: f, fileVendor: e.vendor ?? doc.vendor });
+  }
+}
+
+const byTier = (t: string) => all.filter((e) => e.tier === t);
+const byPurpose = (p: string) => all.filter((e) => e.purpose === p);
+const never = byTier("never");
+
+const purposes = ["acr", "ads", "telemetry", "functional", "ota", "cdn", "ntp"];
+const purposeLabel: Record<string, string> = {
+  acr: "Content recognition",
+  ads: "Advertising",
+  telemetry: "Telemetry and diagnostics",
+  functional: "Needed for the device to work",
+  ota: "Firmware updates",
+  cdn: "Content delivery",
+  ntp: "Time synchronisation",
+};
+
+const vendors = [...new Set(all.map((e) => e.fileVendor))].sort();
+
+// Count reports without listing them, since the publish gate applies to the data and not to
+// the count of files.
+let reportCount = 0;
+const reportsDir = path.join(root, "data", "reports");
+if (fs.existsSync(reportsDir)) {
+  const walk = (dir: string) => {
+    for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, item.name);
+      if (item.isDirectory()) walk(p);
+      else if (item.name.endsWith(".json") || item.name.endsWith(".ndjson")) reportCount++;
+    }
+  };
+  walk(reportsDir);
+}
+
+// Vendors where our own data is thin, computed rather than asserted, so the page cannot
+// overstate coverage.
+const thin = vendors
+  .map((v) => ({ vendor: v, count: all.filter((e) => e.fileVendor === v && e.tier !== "never").length }))
+  .filter((v) => v.count < 8)
+  .sort((a, b) => a.count - b.count);
+---
+
+<Base
+  title="Data"
+  description="The endpoint catalogue, the do-not-block list, and the open research questions. Every entry carries a source and a stated consequence."
+>
+  <div class="doc">
+    <article class="prose" style="grid-column:1/-1">
+      <p class="eyebrow">Data</p>
+      <h1>What we know, and what we do not.</h1>
+      <p class="lede">
+        Every entry carries a source and a stated consequence. The gaps are listed too, because a
+        catalogue that hides its holes is not much use to anyone deciding whether to trust it.
+      </p>
+
+      <div class="grid grid-3" style="margin:var(--sp-6) 0">
+        <div class="stat">
+          <div class="stat-n">{all.length}</div>
+          <p class="stat-l">documented endpoints across {vendors.length} vendors</p>
+        </div>
+        <div class="stat">
+          <div class="stat-n">{never.length}</div>
+          <p class="stat-l">
+            domains that break a television, published as an allowlist
+          </p>
+        </div>
+        <div class="stat">
+          <div class="stat-n">{reportCount}</div>
+          <p class="stat-l">
+            crowdsourced reports merged. A row is published once five separate contributors have
+            reported it.
+          </p>
+        </div>
+      </div>
+
+      <h2>By purpose</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Purpose</th>
+            <th scope="col">Entries</th>
+            <th scope="col">Safe to block</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            purposes.map((p) => {
+              const rows = byPurpose(p);
+              if (rows.length === 0) return null;
+              const safe = rows.filter((r) => r.tier !== "never").length;
+              return (
+                <tr>
+                  <td>{purposeLabel[p]}</td>
+                  <td class="mono">{rows.length}</td>
+                  <td>
+                    {safe === rows.length ? (
+                      <span class="pill pill-ok">all</span>
+                    ) : safe === 0 ? (
+                      <span class="pill pill-bad">none</span>
+                    ) : (
+                      <span class="pill pill-warn">{safe} of {rows.length}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+
+      <h2>By vendor</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Vendor</th>
+            <th scope="col">Blockable</th>
+            <th scope="col">Do not block</th>
+            <th scope="col">Recognition endpoints</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            vendors.map((v) => {
+              const rows = all.filter((e) => e.fileVendor === v);
+              const blockable = rows.filter((r) => r.tier !== "never").length;
+              const acr = rows.filter((r) => r.purpose === "acr").length;
+              return (
+                <tr>
+                  <td><strong>{v}</strong></td>
+                  <td class="mono">{blockable}</td>
+                  <td class="mono">{rows.length - blockable}</td>
+                  <td>
+                    {acr > 0 ? (
+                      <span class="pill pill-bad">{acr}</span>
+                    ) : (
+                      <span class="tiny muted">none documented</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+
+      <h2>The do-not-block list</h2>
+      <p>
+        The part of this catalogue with no good equivalent elsewhere. A blocklist is easy to
+        write. Working out which entries break the app store, the firmware updater, the programme
+        guide or the clock takes evidence, and several widely used lists get it wrong.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Domain</th>
+            <th scope="col">Blocking it breaks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            never
+              .filter((e) => e.breaks && e.breaks !== "unknown")
+              .slice(0, 24)
+              .map((e) => (
+                <tr>
+                  <td><code>{e.domain}</code></td>
+                  <td class="small">{e.breaks}</td>
+                </tr>
+              ))
+          }
+        </tbody>
+      </table>
+      <p class="small muted">
+        Showing 24 of {never.length}.
+        <a href={`${repo}/blob/main/blocklists/allowlist/fightback-tv-do-not-block.txt`} rel="noopener"
+          >The full list</a
+        >, in AdGuard allowlist syntax.
+      </p>
+
+      <h2>Where our data is thin</h2>
+      <p>
+        Computed from the catalogue rather than asserted, so this section cannot quietly go stale
+        while coverage stays poor.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Vendor</th>
+            <th scope="col">Blockable entries</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            thin.map((t) => (
+              <tr>
+                <td>{t.vendor}</td>
+                <td class="mono">{t.count}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <p>
+        The clearest gap is Google and Android TV. There is no HaGeZi native blocklist for that
+        platform, the community has isolated only three platform telemetry hostnames, and Google's
+        own telemetry shares domains with hosts that the Play Store and DRM need. If you own a
+        Google TV and can capture its traffic, that is the single most useful contribution
+        available.
+      </p>
+
+      <h2>Open questions</h2>
+      <p>
+        Things the research could not establish. Each is a good first contribution, and each is
+        the reason a corresponding claim is absent from the guides rather than hedged.
+      </p>
+      <ul>
+        <li>
+          Three figures circulate widely with no primary source: a 50-hour webOS developer session,
+          a two-to-three month Tizen certificate expiry, and the claim that firmware updates
+          silently re-enable content recognition. We publish none of them. The third is measurable,
+          and measuring it would be an original finding.
+        </li>
+        <li>
+          Whether Samsung and LG televisions use hardcoded DNS-over-HTTPS endpoints. The only
+          source making specific claims has unpublished captures and reads as generated content, so
+          we do not cite it.
+        </li>
+        <li>
+          Almost nobody publishes hardcoded IP addresses, the ones a television dials without a DNS
+          lookup. Two addresses from one rooted set is the state of public knowledge, and DNS
+          filtering cannot touch them.
+        </li>
+        <li>
+          Per-manufacturer availability of the Private DNS setting on Android TV, which has no
+          interface in stock builds.
+        </li>
+        <li>
+          Menu paths for Philips Titan OS, Panasonic My Home Screen, and several console platforms.
+        </li>
+        <li>
+          Whether the widely documented VPN consent dialog trap on Google TV also applies to Fire
+          OS. It matters because removing that package permanently prevents any traffic observer
+          from working.
+        </li>
+      </ul>
+
+      <h2>Licences</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">What</th>
+            <th scope="col">Licence</th>
+            <th scope="col">Why</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Blocklists</td>
+            <td><span class="pill pill-ok">CC0 1.0</span></td>
+            <td class="small">
+              Maximum uptake. If another list wants to absorb these entries, it should not have to
+              ask or attribute.
+            </td>
+          </tr>
+          <tr>
+            <td>Endpoint catalogue and guides</td>
+            <td><span class="pill pill-mute">CC BY 4.0</span></td>
+            <td class="small">Reuse freely with credit.</td>
+          </tr>
+          <tr>
+            <td>Report corpus</td>
+            <td><span class="pill pill-mute">ODbL 1.0</span></td>
+            <td class="small">
+              Following Exodus Privacy. Volunteers contributed observations about their own homes,
+              so derivatives should stay open to them.
+            </td>
+          </tr>
+          <tr>
+            <td>Code</td>
+            <td><span class="pill pill-mute">MIT</span></td>
+            <td class="small">No reason to restrict it.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr />
+      <p>
+        <a class="btn btn-ghost" href={`${repo}/tree/main/data`} rel="noopener">Browse the data</a>
+        <a class="btn btn-primary" href={`${base}/contribute`}>Add to it</a>
+      </p>
+    </article>
+  </div>
+</Base>

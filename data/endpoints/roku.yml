@@ -1,0 +1,173 @@
+# Roku OS endpoints
+#
+# Roku is the one platform where a peer-reviewed paper tells us what the device actually
+# needs. Mandalari et al., PETS 2021, classified destinations as required or non-required
+# and found Roku requires only api.sr.roku.com and youtube.com. That makes aggressive
+# blocking defensible here in a way it is not on other platforms.
+#
+# Roku has no on-device DNS setting, so everything here is enforced at the router.
+
+vendor: roku
+platform: roku
+updated: 2026-09-08
+
+entries:
+  # ---------------------------------------------------------------- content recognition
+  - domain: acr.roku.com
+    purpose: acr
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+    notes: >-
+      The most on-target single hostname on the platform. Applies to Roku TVs, which run
+      recognition on the panel, rather than to streaming players.
+
+  # ---------------------------------------------------------------- logging pipeline
+  - domain: logs.roku.com
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Covers the named collector hosts: scribe, midland, austin, cooper, liberty, mobile.
+      Perflyst blocks the wildcard and nothing broke for its users.
+  - domain: logs.sr.roku.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: traces.sr.roku.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: userdata.sr.roku.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: analytics.roku.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: configsvc.cs.roku.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/abs/2105.05162
+    notes: Classified non-required by PETS 2021.
+
+  # ---------------------------------------------------------------- advertising
+  - domain: ads.roku.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: adservices.roku.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: advertising.roku.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: delivery.roku.com
+    wildcard: false
+    regex: '^ads-[a-z0-9-]+\.delivery\.roku\.com$'
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: >-
+      Ad-supported channels may show a black screen or a stall where the ad break would
+      be, rather than skipping it. Behaviour varies by channel.
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+    notes: >-
+      Regional variants ads-us-east-1, ads-us-east-2, ads-us-west-2, plus ads-aka and
+      ads-cf CDN forms. Scoped by regex so the rest of delivery.roku.com is untouched.
+  - domain: pixel.web.roku.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: roku.adsmeasurement.com
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+  - domain: ravm.tv
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Roku's own ad measurement domain. Covers display.ravm.tv.
+
+  # ---------------------------------------------------------------- voice
+  - domain: samples.voice.cti.roku.com
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: >-
+      Voice sample upload stops. Voice search itself is not documented as depending on
+      this host, but that is unconfirmed.
+    source: https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/native.roku-onlydomains.txt
+
+  # ---------------------------------------------------------------- third party
+  - domain: partnerad.l.doubleclick.net
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/abs/2105.05162
+    notes: >-
+      Classified non-required by PETS 2021. The CCS 2019 study found doubleclick.net on
+      975 of the top 1,000 Roku channels.
+
+  # ---------------------------------------------------------------- ambiguous
+  - domain: cloudservices.roku.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://github.com/blocklistproject/Lists/blob/master/smart-tv.txt
+    notes: >-
+      Appears in the Block List Project's smart-tv list with no breakage note. The name
+      suggests device services rather than telemetry. Held out of the core tier until
+      somebody confirms what it does. See the open question in the Roku guide.
+
+  # ---------------------------------------------------------------- never block
+  - domain: api.sr.roku.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      The device stops working. PETS 2021 classified this as one of only two required
+      destinations for a Roku.
+    source: https://arxiv.org/abs/2105.05162
+  - domain: roku.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Everything. Do not wildcard the registrable domain.
+    source: https://arxiv.org/abs/2105.05162
+    notes: >-
+      Present as an explicit guard. The generator asserts that no core-tier list contains
+      a bare roku.com wildcard, because several community lists have shipped one.

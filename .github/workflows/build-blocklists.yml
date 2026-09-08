@@ -1,0 +1,86 @@
+name: Build blocklists
+
+# Two jobs with different purposes.
+#
+# check runs on every pull request and fails if the committed lists do not match the source
+# data, so a reviewer never has to wonder whether the diff in blocklists/ is what the diff in
+# data/endpoints/ implies.
+#
+# The generator itself refuses to emit a list containing a domain marked `never`, so the real
+# safety property is enforced in code rather than by this workflow. What CI adds is that
+# nobody can bypass it by hand-editing the output.
+
+on:
+  pull_request:
+    paths:
+      - "data/endpoints/**"
+      - "blocklists/**"
+      - "tools/build_blocklists.py"
+      - ".github/workflows/build-blocklists.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/endpoints/**"
+      - "tools/build_blocklists.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: python -m pip install --quiet pyyaml
+
+      - name: Committed lists match the source data
+        run: python tools/build_blocklists.py --check
+
+      - name: No core-tier list contains a do-not-block domain
+        run: |
+          # Belt and braces. The generator already refuses to emit these, so this failing
+          # means the generator was bypassed or its enforcement regressed.
+          python - <<'PY'
+          import re, sys
+          from pathlib import Path
+
+          allow = Path("blocklists/allowlist/fightback-tv-do-not-block.txt").read_text()
+          never = set(re.findall(r"^@@\|\|(.+?)\^$", allow, re.M))
+          if not never:
+              sys.exit("could not parse the do-not-block list")
+
+          bad = []
+          for path in Path("blocklists").rglob("*"):
+              if not path.is_file() or "allowlist" in path.parts or path.suffix == ".md":
+                  continue
+              text = path.read_text()
+              for domain in never:
+                  pattern = rf"(^0\.0\.0\.0 {re.escape(domain)}$|^\|\|{re.escape(domain)}\^|^address=/{re.escape(domain)}/$|^{re.escape(domain)}$)"
+                  if re.search(pattern, text, re.M):
+                      bad.append(f"{path}: {domain}")
+
+          if bad:
+              print("::error::these lists contain domains documented to break a television:")
+              for line in bad:
+                  print(f"  {line}")
+              sys.exit(1)
+          print(f"checked {len(never)} do-not-block domains against every generated list")
+          PY
+
+      - name: Reproducible output
+        run: |
+          # Running twice must produce no diff. Without this, a dict ordering change would
+          # show up as spurious churn in every future pull request.
+          python tools/build_blocklists.py
+          if ! git diff --quiet; then
+            echo "::error::the generator is not deterministic, output changed on a second run"
+            git --no-pager diff --stat
+            exit 1
+          fi
+          echo "output is byte-identical across runs"

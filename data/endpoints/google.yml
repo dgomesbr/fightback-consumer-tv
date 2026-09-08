@@ -1,0 +1,117 @@
+# Google Android TV and Google TV endpoints
+#
+# This is the thinnest vendor file in the project, and the reason is worth stating: there
+# is no HaGeZi native blocklist for Google or Android TV, and the community has isolated
+# only three platform telemetry hostnames. Google's own telemetry is co-mingled with
+# googleapis.com hosts that are load-bearing for Play, app updates and DRM, so aggressive
+# blocking here breaks more than it fixes.
+#
+# Filling this gap is one of the clearest contributions a reader with a Google TV can make.
+# See the open question in guides/vendors/google-android-tv.md.
+
+vendor: google
+platform: google-tv
+updated: 2026-09-08
+
+entries:
+  - domain: androidtvchannels-pa.googleapis.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: The sponsored and recommended content rows on the home screen stop populating.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: androidtvlauncherxfe-pa.googleapis.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: The Google TV launcher rows stop populating. Some users report a slower launcher.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: androidtvwatsonfe-pa.googleapis.com
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: true
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: googleads.g.doubleclick.net
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/blokadaorg/blokada/issues/134
+    notes: >-
+      Confirmed blocked on a Sony Android TV in a Blokada log, which is the clearest public
+      evidence that on-device blocking works on a television.
+  - domain: securepubads.g.doubleclick.net
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/blokadaorg/blokada/issues/134
+  - domain: partnerad.l.doubleclick.net
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://arxiv.org/abs/2105.05162
+  - domain: 2mdn.net
+    wildcard: true
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- never block
+  - domain: googleapis.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      Play Store, app updates, DRM licensing and sign-in all fail. The three platform
+      telemetry hosts under this domain are listed individually above. Block those, not
+      the parent.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: play.google.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The Play Store stops working.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: gvt1.com
+    wildcard: true
+    purpose: cdn
+    tier: never
+    safe_to_block: false
+    breaks: App downloads and updates fail.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: android.apis.google.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Device check-in and account sync fail.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: connectivitycheck.gstatic.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The device decides it has no internet connection and may refuse to work.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: connectivitycheck.android.com
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The device decides it has no internet connection.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: time.google.com
+    purpose: ntp
+    tier: never
+    safe_to_block: false
+    breaks: The clock drifts and certificate validation starts failing.
+    source: https://support.google.com/work/android/answer/10513641
+  - domain: ota.googlezip.net
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: System updates fail.
+    source: https://support.google.com/work/android/answer/10513641

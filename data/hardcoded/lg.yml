@@ -1,0 +1,40 @@
+# LG hardcoded addresses
+#
+# Addresses a device dials without a DNS lookup first. DNS filtering cannot see these at
+# all, so a resolver blocklist has no effect on them. Only a firewall rule reaches them.
+#
+# These are also the reason the verification page tells readers to capture on the WAN side
+# as well as the LAN side. A LAN-side capture on port 53 shows nothing here.
+#
+# This file is deliberately short, because almost nobody publishes this data. Two addresses
+# from one rooted television is the state of public knowledge. Contributing to it is one of
+# the highest-value things a reader with a packet capture can do.
+
+vendor: lg
+platform: webos
+updated: 2026-09-08
+
+entries:
+  - address: 156.147.69.32
+    port: 8080
+    proto: tcp
+    purpose: ota
+    tier: never
+    breaks: Firmware updates fail.
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    observed_on: "OLED65G5WUA, rooted, filesystem and netstat inspection"
+    notes: >-
+      Described as a hardcoded over-the-air update fallback. Blocking it is a deliberate
+      choice for someone who does not want firmware updates, not a default.
+  - address: 54.186.247.229
+    port: 443
+    proto: tcp
+    purpose: telemetry
+    tier: core
+    breaks: null
+    source: https://forum.level1techs.com/t/lg-tv-block-mini-how-to/255178
+    observed_on: "OLED65G5WUA, rooted, live netstat"
+    notes: >-
+      An AWS address observed carrying live service delivery platform telemetry. Being an
+      AWS address it may be reassigned, so treat it as a lead to verify rather than a
+      permanent fact, and re-check before relying on it.

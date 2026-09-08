@@ -1,0 +1,127 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+const guides = await getCollection("guides");
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// guides/README.md is the hand-written index. Render it, and put a generated listing under it
+// so a new file cannot be silently missing from the site.
+const readme = guides.find((g) => g.id === "README");
+const rendered = readme ? await render(readme) : null;
+
+const groups: Record<string, typeof guides> = {
+  "Start here": [],
+  Televisions: [],
+  Routers: [],
+  Resolvers: [],
+};
+
+for (const g of guides) {
+  if (g.id === "README") continue;
+  if (g.id.startsWith("vendors/")) groups.Televisions.push(g);
+  else if (g.id.startsWith("routers/")) groups.Routers.push(g);
+  else if (g.id.startsWith("resolvers/")) groups.Resolvers.push(g);
+  else groups["Start here"].push(g);
+}
+
+// Deliberate reading order for the cross-cutting pages, rather than alphabetical.
+const order = [
+  "start-here",
+  "why-dns",
+  "choose-a-resolver",
+  "router-enforcement",
+  "ipv6-leaks",
+  "verify-it-works",
+  "what-breaks",
+];
+groups["Start here"].sort((a, b) => {
+  const ia = order.indexOf(a.id);
+  const ib = order.indexOf(b.id);
+  return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+});
+for (const key of ["Televisions", "Routers", "Resolvers"]) {
+  groups[key].sort((a, b) => a.id.localeCompare(b.id));
+}
+
+function label(g: (typeof guides)[number]): string {
+  const t = (g.data as Record<string, any>).title;
+  if (t) return String(t);
+  const leaf = g.id.split("/").pop() ?? g.id;
+  return leaf.replace(/-/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+}
+
+function tierPill(g: (typeof guides)[number]) {
+  const n = Number((g.data as Record<string, any>).max_tier);
+  if (Number.isNaN(n)) return null;
+  return {
+    text: `tier ${n}`,
+    cls: n >= 3 ? "pill-ok" : n >= 2 ? "pill-warn" : "pill-bad",
+  };
+}
+
+// Flattened ahead of the markup. TypeScript casts inside a JSX expression do not parse, so
+// every value the template needs is resolved here first.
+const sections = Object.entries(groups)
+  .filter(([, items]) => items.length > 0)
+  .map(([name, items]) => ({
+    name,
+    items: items.map((g) => {
+      const d = g.data as Record<string, any>;
+      return {
+        href: `${base}/guides/${g.id}`,
+        label: label(g),
+        pill: tierPill(g),
+        brands: Array.isArray(d.brands) ? (d.brands as string[]).join(", ") : null,
+        generations: d.generations ? String(d.generations) : null,
+      };
+    }),
+  }));
+---
+
+<Base
+  title="Guides"
+  description="Per-vendor and per-router guides for stopping smart TV tracking. Find your television, follow the tiers, and see what each step breaks."
+>
+  <div class="doc">
+    <article class="prose" style="grid-column:1/-1">
+      {rendered ? <rendered.Content /> : <h1>Guides</h1>}
+
+      <hr />
+
+      <h2>Every page</h2>
+      <p class="muted small">
+        Generated from the files in the repository, so nothing here can drift out of date
+        relative to what is published.
+      </p>
+
+      {
+        sections.map((section) => (
+          <section>
+            <h3>{section.name}</h3>
+            <div class="grid grid-2" style="margin-bottom:var(--sp-5)">
+              {section.items.map((item) => (
+                <a class="card" href={item.href}>
+                  <div style="display:flex;gap:var(--sp-3);align-items:baseline;justify-content:space-between">
+                    <strong>{item.label}</strong>
+                    {item.pill && <span class={`pill ${item.pill.cls}`}>{item.pill.text}</span>}
+                  </div>
+                  {item.brands && (
+                    <p class="tiny muted mb0" style="margin-top:var(--sp-2)">
+                      {item.brands}
+                    </p>
+                  )}
+                  {item.generations && (
+                    <p class="tiny muted mb0" style="margin-top:var(--sp-1)">
+                      {item.generations}
+                    </p>
+                  )}
+                </a>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </article>
+  </div>
+</Base>

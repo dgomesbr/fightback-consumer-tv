@@ -514,8 +514,13 @@ TV's browser visits can silently install an app and read config files. "Do not b
 Hisense TV" is legitimate, sourced advice.
 
 **Domains.** `api-gps-em`, `auth-em`, `msg-em`, `api-launcher-em`, `auth-launcher-em`, and the `-na`
-equivalents, plus `unified-ter-na`, all under `.hismarttv.com`. Regex
-`^api\..*\.hismarttv\.com$`. `api-gps-em` connects thousands of times a day.
+equivalents, plus `unified-ter-na`, all under `.hismarttv.com`. `api-gps-em` connects thousands of
+times a day.
+
+**Do not use the regex `^api\..*\.hismarttv\.com$`** that circulates for this vendor. It matches
+`api.us.hismarttv.com`, `api.euro.hismarttv.com` and `api.eu.hismarttv.com`, which are the three
+hosts on the never-block list because they may carry firmware updates. Use a prefix-scoped pattern
+instead, as `data/endpoints/hisense.yml` does.
 
 **Never block.** `api.us.hismarttv.com`, `api.euro.hismarttv.com` and `api.eu.hismarttv.com` may be
 needed for firmware updates.
@@ -609,10 +614,6 @@ uci set firewall.dns_int.src_dport="53"
 uci set firewall.dns_int.target="DNAT"
 uci set firewall.dns_int.dest_ip="192.168.2.2"
 uci set firewall.dns_int.src_ip="!192.168.2.2"
-uci set firewall.dns_int6.dest_ip="fd53::53"
-uci set firewall.dns_int6.src_ip="!fd53::53"
-uci set firewall.dot_fwd.target="REJECT"
-uci set firewall.dot_fwd.dest_port="853"
 uci commit firewall
 service firewall restart
 ```
@@ -620,6 +621,27 @@ service firewall restart
 The `!` self-exclusion is the step people forget, and omitting it causes a redirect loop. Source:
 [OpenWrt intercept DNS](https://openwrt.org/docs/guide-user/firewall/fw3_configurations/intercept_dns).
 The `fw4_configurations/intercept_dns` page does not exist; do not link it.
+
+**Two fragments that are incomplete, and must not be published as working config.** Research
+captured only the distinguishing lines of the IPv6 rule and the port 853 rule, not the whole
+sections. Both are missing the section type, `name`, `family`, `proto`, `src` and `src_dport` that
+the IPv4 rule above sets:
+
+```
+# FRAGMENT ONLY. Not a working rule. See the wiki for the full section.
+uci set firewall.dns_int6.dest_ip="fd53::53"
+uci set firewall.dns_int6.src_ip="!fd53::53"
+
+# FRAGMENT ONLY. Not a working rule.
+uci set firewall.dot_fwd.target="REJECT"
+uci set firewall.dot_fwd.dest_port="853"
+```
+
+The IPv6 twin and the port 853 reject are both real and documented on the same wiki page. What is
+missing here is the surrounding boilerplate, so anyone writing the OpenWrt guide has to pull the
+complete sections from the wiki rather than pasting these two pairs. Publishing a half-specified
+firewall rule is the worst failure mode this project has, because it silently does nothing while the
+reader believes they are protected.
 
 **pfSense**, three rules and order matters. A port forward on LAN for TCP and UDP 53 with the
 destination inverted to exclude the resolver, redirecting to the resolver. Above it, a No RDR rule for

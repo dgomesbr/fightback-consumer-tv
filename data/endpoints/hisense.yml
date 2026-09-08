@@ -1,0 +1,51 @@
+# Hisense VIDAA endpoints
+#
+# There is no HaGeZi native list for Hisense, so this file is built from Perflyst and
+# FTPrivacy. Hisense also ships Google TV and Roku TV models, which use those files instead.
+
+vendor: hisense
+platform: vidaa
+updated: 2026-09-08
+
+entries:
+  - domain: hismarttv.com
+    wildcard: false
+    regex: '^(api-gps|auth|msg|api-launcher|auth-launcher|unified-ter)-(em|na)\.hismarttv\.com$'
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      The regional collector hosts. Perflyst records api-gps-em connecting thousands of
+      times a day. Scoped by regex because the api.us, api.euro and api.eu hosts under the
+      same domain may carry firmware updates and are on the never-block list below.
+
+  # ---------------------------------------------------------------- never block
+  - domain: api.us.hismarttv.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: May be required for software and firmware updates.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: api.euro.hismarttv.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: May be required for software and firmware updates.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: api.eu.hismarttv.com
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: May be required for software and firmware updates.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: vidaahub.com
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      The app store stops working. Note this is also the domain the vidaa-edge sideloading
+      method deliberately redirects, so blocking it and redirecting it are different things.
+    source: https://github.com/weinzii/vidaa-edge

@@ -1,0 +1,478 @@
+---
+/**
+ * Hero with a pure CSS animation: a television emits packets toward vendor endpoints, a
+ * resolver intercepts most of them, and the ones that get through are the honest part of
+ * the picture.
+ *
+ * No JavaScript, no canvas, no SVG animation library. Everything moves via transform and
+ * opacity only, so it composites on the GPU and does not trigger layout on any frame.
+ *
+ * The design decision worth stating: the animation shows blocking as incomplete. Two packets
+ * per cycle pass the shield, because the guides say plainly that a determined television gets
+ * through and pretending otherwise in the hero would undercut the text.
+ */
+
+interface Props {
+  endpoints?: string[];
+}
+
+const {
+  endpoints = [
+    "acr.​vendor.tv",
+    "ads.​vendor.com",
+    "metrics.​vendor.net",
+    "logs.​vendor.io",
+  ],
+} = Astro.props;
+
+// Twelve packets. Each gets its own lane, delay and duration so the stream never visibly
+// loops in lockstep. Two are marked as escaping.
+const packets = [
+  { lane: 0, delay: 0.0, dur: 3.4, escapes: false },
+  { lane: 1, delay: 0.45, dur: 3.9, escapes: false },
+  { lane: 2, delay: 0.9, dur: 3.2, escapes: false },
+  { lane: 3, delay: 1.3, dur: 4.1, escapes: false },
+  { lane: 0, delay: 1.75, dur: 3.6, escapes: true },
+  { lane: 1, delay: 2.2, dur: 3.3, escapes: false },
+  { lane: 2, delay: 2.6, dur: 4.0, escapes: false },
+  { lane: 3, delay: 3.05, dur: 3.5, escapes: false },
+  { lane: 0, delay: 3.5, dur: 3.8, escapes: false },
+  { lane: 1, delay: 3.95, dur: 3.4, escapes: false },
+  { lane: 2, delay: 4.4, dur: 3.7, escapes: true },
+  { lane: 3, delay: 4.85, dur: 3.3, escapes: false },
+];
+---
+
+<div class="hero-art" role="img" aria-label="A television sending data to advertising and analytics endpoints, with a DNS filter intercepting most of it and two connections getting through.">
+  <div class="scene">
+    <!-- the television -->
+    <div class="tv">
+      <div class="tv-screen">
+        <span class="tv-glow"></span>
+        <span class="tv-scan"></span>
+      </div>
+      <div class="tv-stand"></div>
+      <div class="tv-label">your TV</div>
+      <div class="tv-mic" title="microphone">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- the resolver -->
+    <div class="shield">
+      <div class="shield-bar">
+        <span class="shield-pulse"></span>
+      </div>
+      <div class="shield-label">DNS filter</div>
+    </div>
+
+    <!-- vendor endpoints -->
+    <ul class="ends">
+      {endpoints.map((e, i) => (
+        <li class="end" style={`--i:${i}`}>
+          <span class="end-dot"></span>
+          <code>{e}</code>
+        </li>
+      ))}
+    </ul>
+
+    <!-- packets -->
+    <div class="packets" aria-hidden="true">
+      {packets.map((p) => (
+        <span
+          class:list={["pkt", { escapes: p.escapes }]}
+          style={`--lane:${p.lane}; --delay:${p.delay}s; --dur:${p.dur}s`}
+        ></span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .hero-art {
+    --lanes: 4;
+    --lane-gap: 46px;
+    --track: clamp(220px, 34vw, 380px);
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    display: grid;
+    place-items: center;
+    contain: layout paint;
+  }
+
+  .scene {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: 260px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--sp-4);
+  }
+
+  /* ------------------------------------------------------------------ television */
+
+  .tv {
+    position: relative;
+    width: 96px;
+    justify-self: start;
+  }
+  .tv-screen {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 5px;
+    background: linear-gradient(160deg, #16202e, #0a0f16 60%);
+    border: 1px solid var(--line-2);
+    box-shadow:
+      inset 0 0 22px color-mix(in oklab, var(--accent), transparent 88%),
+      var(--shadow-2);
+    overflow: hidden;
+  }
+  .tv-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      120% 90% at 30% 20%,
+      color-mix(in oklab, var(--accent), transparent 72%),
+      transparent 62%
+    );
+    animation: tvFlicker 5.5s var(--ease) infinite;
+  }
+  /* A scanline drifting down the panel. This is the content-recognition idea, stated
+     visually: something is reading the screen. */
+  .tv-scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 26%;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in oklab, var(--bad), transparent 82%),
+      transparent
+    );
+    animation: scan 3.6s linear infinite;
+  }
+  .tv-stand {
+    width: 34px;
+    height: 8px;
+    margin: 4px auto 0;
+    border-radius: 0 0 3px 3px;
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    border-top: 0;
+  }
+  .tv-label {
+    margin-top: var(--sp-2);
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--fg-3);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+  /* Three bars rising and falling. The microphone is listening. */
+  .tv-mic {
+    position: absolute;
+    top: -14px;
+    right: -6px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+  }
+  .tv-mic span {
+    width: 2px;
+    background: var(--bad);
+    border-radius: 1px;
+    opacity: 0.75;
+    animation: mic 1.4s var(--ease) infinite;
+  }
+  .tv-mic span:nth-child(1) {
+    height: 40%;
+    animation-delay: 0s;
+  }
+  .tv-mic span:nth-child(2) {
+    height: 100%;
+    animation-delay: 0.18s;
+  }
+  .tv-mic span:nth-child(3) {
+    height: 60%;
+    animation-delay: 0.36s;
+  }
+
+  /* ------------------------------------------------------------------ resolver */
+
+  .shield {
+    position: absolute;
+    left: 46%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    text-align: center;
+  }
+  .shield-bar {
+    position: relative;
+    width: 3px;
+    height: 168px;
+    margin-inline: auto;
+    border-radius: 2px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      var(--ok) 12%,
+      var(--ok) 88%,
+      transparent
+    );
+    box-shadow: 0 0 16px color-mix(in oklab, var(--ok), transparent 55%);
+  }
+  .shield-pulse {
+    position: absolute;
+    inset: -3px;
+    border-radius: 4px;
+    background: var(--ok);
+    filter: blur(7px);
+    opacity: 0.28;
+    animation: pulse 2.9s var(--ease) infinite;
+  }
+  .shield-label {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    font-family: var(--mono);
+    color: var(--ok);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* ------------------------------------------------------------------ endpoints */
+
+  .ends {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    justify-self: end;
+    display: grid;
+    gap: 10px;
+    z-index: 2;
+  }
+  .end {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: 0.7rem;
+  }
+  .end code {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    color: var(--fg-2);
+    padding: 0.18em 0.45em;
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+  .end-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bad);
+    box-shadow: 0 0 8px color-mix(in oklab, var(--bad), transparent 40%);
+    animation: endBlink 3.2s var(--ease) infinite;
+    animation-delay: calc(var(--i) * 0.4s);
+    flex: none;
+  }
+
+  /* ------------------------------------------------------------------ packets */
+
+  .packets {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .pkt {
+    position: absolute;
+    left: 92px;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--bad);
+    box-shadow: 0 0 7px color-mix(in oklab, var(--bad), transparent 35%);
+    /* Lane offset centres the four lanes on the vertical midline. */
+    margin-top: calc((var(--lane) - 1.5) * 26px);
+    opacity: 0;
+    /* One animation drives x, another drives fade. Both are compositor-only. */
+    animation:
+      fly var(--dur) linear infinite,
+      absorb var(--dur) linear infinite;
+    animation-delay: var(--delay);
+    will-change: transform, opacity;
+  }
+  /* The two that get through keep going and turn green on the far side, because a filter
+     that catches everything is not what the guides promise. */
+  .pkt.escapes {
+    animation-name: fly, escape;
+  }
+
+  /* ------------------------------------------------------------------ keyframes */
+
+  @keyframes fly {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(var(--track));
+    }
+  }
+
+  /* Absorbed at the shield, which sits a little past halfway. */
+  @keyframes absorb {
+    0% {
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    46% {
+      opacity: 1;
+      background: var(--bad);
+    }
+    54% {
+      opacity: 0.9;
+      background: var(--ok);
+    }
+    62% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes escape {
+    0% {
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    46% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 0.22;
+      transform: scaleY(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scaleY(1.02);
+    }
+  }
+
+  @keyframes scan {
+    from {
+      transform: translateY(-120%);
+    }
+    to {
+      transform: translateY(420%);
+    }
+  }
+
+  @keyframes tvFlicker {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    42% {
+      opacity: 1;
+    }
+    46% {
+      opacity: 0.7;
+    }
+    70% {
+      opacity: 0.95;
+    }
+  }
+
+  @keyframes mic {
+    0%,
+    100% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes endBlink {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* ------------------------------------------------------------------ responsive */
+
+  @media (max-width: 620px) {
+    .scene {
+      height: 220px;
+      max-width: 100%;
+    }
+    .tv {
+      width: 74px;
+    }
+    .pkt {
+      left: 72px;
+      margin-top: calc((var(--lane) - 1.5) * 20px);
+    }
+    .shield-bar {
+      height: 132px;
+    }
+    .ends {
+      gap: 7px;
+    }
+    .end code {
+      font-size: 0.62rem;
+    }
+  }
+
+  /* Reduced motion gets a still diagram rather than a frozen half-animation. The packets
+     are placed along the track and the escaping ones stay red past the shield, so the
+     picture still says what the moving version says. */
+  @media (prefers-reduced-motion: reduce) {
+    .pkt {
+      opacity: 1;
+      animation: none;
+      transform: translateX(calc(var(--delay) * 42px));
+      background: var(--bad);
+    }
+    .pkt.escapes {
+      transform: translateX(var(--track));
+    }
+    .tv-scan,
+    .shield-pulse,
+    .tv-glow {
+      animation: none;
+    }
+    .tv-mic span {
+      animation: none;
+      transform: scaleY(0.7);
+    }
+    .end-dot {
+      animation: none;
+      opacity: 0.85;
+    }
+  }
+</style>

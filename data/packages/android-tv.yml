@@ -1,0 +1,228 @@
+# Android TV and Google TV preinstalled packages
+#
+# Package safety is per model, not per platform. The community lists contradict each other,
+# and both sides are probably right for their own hardware. This file therefore records
+# which models an entry was tested on, and the generator refuses to emit a command for a
+# model that is not listed.
+#
+# safe values:
+#   true     documented as removable on the models in tested_on
+#   false    documented to break something. Never emit.
+#   unknown  nobody has checked. Never emit.
+#
+# Always pm disable-user rather than pm uninstall where the platform allows it, so the
+# change is reversible without a factory reset.
+
+platform: android-tv
+also_applies_to: [google-tv]
+updated: 2026-09-08
+
+packages:
+  # ================================================================ content recognition
+  - package: tv.samba.ssm
+    label: Samba TV
+    purpose: acr
+    vendors: [sony, tcl]
+    tested_on: ["Sony Bravia, Android TV, model not recorded by source"]
+    safe: true
+    breaks: null
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+    notes: >-
+      The single highest-value removal on a Sony set. The source labels it ad tracking and
+      viewing data collection. Present in TCL Google TV lists as well. The matching Tier 0
+      setting is Samba Interactive TV.
+
+  # ================================================================ advertising
+  - package: com.tcl.screenadservice
+    label: TCL screen ad service
+    purpose: ads
+    vendors: [tcl]
+    tested_on: ["TCL Google TV, model not recorded by source"]
+    safe: true
+    breaks: null
+    source: https://github.com/seun-novodev/android-tv-debloat-toolkit
+
+  # ================================================================ diagnostics and telemetry
+  - package: com.sony.dtv.sonybugreportsys
+    label: Sony bug report
+    purpose: telemetry
+    vendors: [sony]
+    tested_on: ["Sony Bravia, Google TV, model not recorded by source"]
+    safe: true
+    breaks: null
+    source: https://github.com/therealhoodboy/skinny-bravia
+  - package: com.sony.dtv.system.crashlog
+    label: Sony crash log
+    purpose: telemetry
+    vendors: [sony]
+    tested_on: ["Sony Bravia, Google TV, model not recorded by source"]
+    safe: true
+    breaks: null
+    source: https://github.com/therealhoodboy/skinny-bravia
+  - package: com.sony.dtv.customersupport
+    label: Sony customer support
+    purpose: telemetry
+    vendors: [sony]
+    tested_on: ["Sony Bravia, Google TV, model not recorded by source"]
+    safe: true
+    breaks: null
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.sony.dtv.da.service
+    label: Sony remote support
+    purpose: telemetry
+    vendors: [sony]
+    tested_on: ["Sony Bravia, Google TV, model not recorded by source"]
+    safe: true
+    breaks: Remote technical support sessions stop working.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.sony.dtv.promos
+    label: Sony promotions
+    purpose: ads
+    vendors: [sony]
+    tested_on: ["Sony Bravia, Google TV, model not recorded by source"]
+    safe: true
+    breaks: null
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.sony.dtv.sonyselect
+    label: Sony Select
+    purpose: ads
+    vendors: [sony]
+    tested_on: ["Sony Bravia, Google TV, model not recorded by source"]
+    safe: true
+    breaks: The Sony Select app recommendations disappear.
+    source: https://github.com/therealhoodboy/skinny-bravia
+  - package: com.google.android.tv.bugreportsender
+    label: Android TV bug report sender
+    purpose: telemetry
+    vendors: [google, sony, tcl, hisense, philips]
+    tested_on: ["Generic Android TV, per source"]
+    safe: true
+    breaks: null
+    source: https://github.com/seun-novodev/android-tv-debloat-toolkit
+  - package: com.google.android.feedback
+    label: Google feedback
+    purpose: telemetry
+    vendors: [google, sony, tcl, hisense, philips]
+    tested_on: ["Generic Android TV, per source"]
+    safe: true
+    breaks: null
+    source: https://github.com/seun-novodev/android-tv-debloat-toolkit
+  - package: com.google.android.partnersetup
+    label: Google partner setup
+    purpose: telemetry
+    vendors: [google, sony, tcl, hisense, philips]
+    tested_on: ["Generic Android TV, per source"]
+    safe: true
+    breaks: null
+    source: https://github.com/seun-novodev/android-tv-debloat-toolkit
+
+  # ================================================================ contested
+  - package: com.google.android.tvrecommendations
+    label: Android TV recommendations
+    purpose: telemetry
+    vendors: [google, sony, tcl]
+    tested_on: []
+    safe: unknown
+    breaks: >-
+      Contested. One TCL toolkit lists this as a primary safe removal and reports a faster
+      interface afterwards. A Sony guide lists it under packages that cause a boot loop if
+      removed. Both may be correct for their own hardware.
+    source: https://github.com/livvaa/TCL-Google-TV-Debloat-Optimizer
+    source_contradicting: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+    notes: >-
+      This entry is why the whole file is scoped per model. Never emitted until somebody
+      reports a specific model and firmware it was tested on. If you have tested it, that
+      is a valuable pull request.
+
+  # ================================================================ launcher, conditional
+  - package: com.google.android.apps.tv.launcherx
+    label: Google TV launcher
+    purpose: ads
+    vendors: [google, sony, tcl, hisense]
+    tested_on: ["Chromecast with Google TV, per source"]
+    safe: conditional
+    requires: "A replacement launcher installed first, for example FLauncher or LtvLauncher"
+    breaks: >-
+      Without a replacement launcher the TV has no home screen. On Chromecast with Google
+      TV the YouTube button on the remote stops working.
+    source: https://github.com/osrosal/flauncher
+    notes: The sponsored and recommended rows live here, which is why people remove it.
+  - package: com.google.android.tungsten.setupwraith
+    label: Android TV setup wizard and fallback launcher
+    purpose: functional
+    vendors: [google, sony, tcl, hisense]
+    tested_on: ["Chromecast with Google TV, per source"]
+    safe: conditional
+    requires: "Only disable after disabling com.google.android.apps.tv.launcherx"
+    breaks: >-
+      Disabling this on its own achieves nothing and can interfere with setup. It is not a
+      telemetry package, contrary to how it is often described. Its relevance is that it
+      re-enables the default launcher, so a third-party launcher will not stick until it is
+      disabled too.
+    source: https://github.com/osrosal/flauncher
+
+  # ================================================================ never remove
+  - package: com.android.vpndialogs
+    label: System VPN consent dialog
+    purpose: functional
+    vendors: [all]
+    tested_on: []
+    safe: false
+    breaks: >-
+      Any network monitoring or filtering app becomes permanently unusable. This package
+      shows the system dialog that grants VpnService permission, so without it permission
+      can never be granted again.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+    notes: >-
+      A widely shared Sony debloat one-liner uninstalls this. Anyone who runs that script
+      and later tries to install a traffic observer will find it cannot work, with no
+      obvious explanation. Recovery is a factory reset.
+  - package: com.android.captiveportallogin
+    label: Captive portal login
+    purpose: functional
+    vendors: [all]
+    tested_on: []
+    safe: false
+    breaks: The TV cannot join networks that use a captive portal.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+    notes: Removed by the same widely shared one-liner.
+  - package: com.google.android.webview
+    label: Android System WebView
+    purpose: functional
+    vendors: [all]
+    tested_on: []
+    safe: false
+    breaks: The entire interface breaks.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.google.android.katniss
+    label: Google search and assistant for TV
+    purpose: functional
+    vendors: [google, sony, tcl, hisense]
+    tested_on: []
+    safe: false
+    breaks: The Google TV launcher stops working.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.sony.dtv.tvx
+    label: Sony TV experience
+    purpose: functional
+    vendors: [sony]
+    tested_on: []
+    safe: false
+    breaks: The boot process fails. The TV does not start.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.google.android.tts
+    label: Text to speech
+    purpose: functional
+    vendors: [all]
+    tested_on: []
+    safe: false
+    breaks: Documented as causing a boot loop on Sony Google TV.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat
+  - package: com.android.location.fused
+    label: Fused location provider
+    purpose: functional
+    vendors: [all]
+    tested_on: []
+    safe: false
+    breaks: Documented as causing a boot loop on Sony Google TV.
+    source: https://github.com/ironshadow786786-boop/sony-google-tv-debloat

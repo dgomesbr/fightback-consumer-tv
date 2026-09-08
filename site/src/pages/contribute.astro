@@ -1,0 +1,195 @@
+---
+import Base from "../layouts/Base.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const repo = "https://github.com/dgomesbr/fightback-consumer-tv";
+---
+
+<Base
+  title="Contribute"
+  description="How to help: correct a menu path, report what your TV contacts, or add endpoint data. You do not need to be a programmer."
+>
+  <div class="doc">
+    <article class="prose" style="grid-column:1/-1">
+      <p class="eyebrow">Contribute</p>
+      <h1>You do not need to be a programmer.</h1>
+      <p class="lede">
+        The most valuable contributions come from people who own the hardware and can check
+        whether what we published is true on their model.
+      </p>
+
+      <h2>The two-minute version</h2>
+      <p>
+        Vendors move settings between firmware versions and between countries. A guide that sends
+        someone to a menu that does not exist on their television loses them for good. Every menu
+        path we publish is marked either verified or needs confirmation, and almost all of them
+        are the latter.
+      </p>
+      <p>
+        So: open your TV's settings, compare them to your vendor page, and tell us what you
+        actually see. That fixes the guide for everyone with that model.
+      </p>
+      <p>
+        <a class="btn btn-primary" href={`${repo}/issues/new?template=bug_report.yml`} rel="noopener"
+          >Correct a menu path</a
+        >
+        <a class="btn btn-ghost" href={`${base}/guides`}>Find your page first</a>
+      </p>
+
+      <h2>Report what your TV contacts</h2>
+      <p>
+        This is how the dataset and the blocklists improve. You need a filtering resolver already
+        running: Pi-hole, AdGuard Home or a NextDNS account. If you do not have one,
+        <a href={`${base}/guides/choose-a-resolver`}>set one up</a> first, since it helps you
+        either way.
+      </p>
+      <pre><code>python collector/router/fightback.py \
+  --source adguard-file --log /opt/AdGuardHome/data/querylog.json \
+  --device 192.168.1.42 \
+  --vendor lg --model "LG OLED C3" --platform webos \
+  --os-major 8 --region GB --acr optout --scenario idle \
+  --preview</code></pre>
+      <p>
+        It reads your query log, strips everything identifying, and prints the exact file it would
+        upload. Read it. If you are happy, add <code>--submit</code> and it opens a pull request.
+      </p>
+
+      <div class="note note-ok">
+        <p class="mb0">
+          <strong>Nothing leaves your machine until you ask.</strong> Local-only is the default,
+          and there is no code path that uploads a report you have not been shown first.
+        </p>
+      </div>
+
+      <p>
+        Not comfortable with the command line? Use the
+        <a href={`${repo}/issues/new?template=device_report.yml`} rel="noopener">report form</a>
+        and paste only the hostnames.
+      </p>
+
+      <div class="note note-bad">
+        <p class="mb0">
+          <strong>Do not paste a raw log file or packet capture.</strong> Your Pi-hole and AdGuard
+          Home logs contain the address of every device in your house and the hostnames you chose
+          for them. We cannot accept them.
+        </p>
+      </div>
+
+      <h2>What a report contains, field by field</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Collected</th>
+            <th scope="col">Never collected</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="small">
+              Vendor and model family<br />
+              Platform and firmware major version<br />
+              Country, two letters<br />
+              Menu language<br />
+              Whether content recognition was off<br />
+              Hostnames contacted, with identifiers removed<br />
+              Port, protocol, count<br />
+              First and last seen, rounded to the hour
+            </td>
+            <td class="small">
+              Your IP address, and the TV's<br />
+              MAC addresses<br />
+              Serial numbers and device identifiers<br />
+              Your Wi-Fi network name<br />
+              Hostnames of your other devices<br />
+              URL paths and query strings<br />
+              Any payload content<br />
+              City, postcode, coordinates, timezone<br />
+              Timestamps finer than an hour
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="small muted">
+        The right-hand column does not exist in the schema, so a report cannot carry one even by
+        accident. <a href={`${repo}/blob/main/PRIVACY.md`} rel="noopener">The full policy</a> ·
+        <a href={`${repo}/blob/main/data/schema/report.schema.json`} rel="noopener">The schema</a>
+      </p>
+
+      <h2>Hostnames get rewritten before they leave your machine</h2>
+      <p>
+        Vendors put identifiers inside hostnames. A television looking up
+        <code>3f2504e0-4f89-11d3-9a0c-0305e82c3301.metrics.example.com</code> has just published
+        something unique to your household in a DNS query. Stored as-is, every row of the dataset
+        would be a household identifier.
+      </p>
+      <p>So it becomes <code>&#123;id&#125;.metrics.example.com</code> before anything is sent.</p>
+      <p>
+        A numeric suffix is treated differently. <code>eu-acr3.alphonso.tv</code> becomes
+        <code>eu-acr&#123;n&#125;.alphonso.tv</code>, because that pattern is a vendor's regional
+        server layout rather than anything about you, and throwing it away would lose real signal
+        for no privacy gain.
+      </p>
+
+      <h2>Add endpoint data</h2>
+      <p>
+        The blocklists are generated. Do not edit anything in <code>blocklists/</code>. Edit
+        <code>data/endpoints/&lt;vendor&gt;.yml</code> instead:
+      </p>
+      <pre><code>- domain: acr-eu-prd.samsungcloud.tv
+  purpose: acr
+  tier: core
+  safe_to_block: true
+  breaks: null
+  source: https://arxiv.org/html/2409.06203v1</code></pre>
+      <p>
+        The <code>breaks</code> field matters more than the domain. A list that kills someone's
+        Netflix does more harm than the tracking it prevents. If you do not know what a domain
+        breaks, write <code>unknown</code> and it stays out of the default list.
+      </p>
+
+      <h2>What we will decline</h2>
+      <ul>
+        <li>Exploit code, root procedures, or firmware patches. We explain what root achieves and
+          link the projects that maintain it.</li>
+        <li>Anything that decrypts traffic or bypasses certificate pinning.</li>
+        <li>Collecting more identifying data, however useful it would be for analysis.</li>
+        <li>Duplicating HaGeZi. Their lists are excellent and rebuilt daily. We add annotation and
+          per-model evidence, not more domains for their own sake.</li>
+      </ul>
+      <p class="small muted">
+        <a href={`${repo}/blob/main/LEGAL.md`} rel="noopener">Why those limits exist</a>
+      </p>
+
+      <hr />
+      <h2>Start somewhere</h2>
+      <div class="grid grid-2">
+        <a class="card" href={`${repo}/issues/new?template=bug_report.yml`} rel="noopener">
+          <strong>Something is wrong</strong>
+          <p class="small muted mb0" style="margin-top:var(--sp-2)">
+            A menu path that does not match your TV, an instruction that failed, or a blocklist
+            entry that broke something.
+          </p>
+        </a>
+        <a class="card" href={`${repo}/issues/new?template=device_report.yml`} rel="noopener">
+          <strong>Report your TV</strong>
+          <p class="small muted mb0" style="margin-top:var(--sp-2)">
+            The endpoints it contacts, and whether turning recognition off actually stopped them.
+          </p>
+        </a>
+        <a class="card" href={`${repo}/issues/new?template=guide_request.yml`} rel="noopener">
+          <strong>My hardware is not covered</strong>
+          <p class="small muted mb0" style="margin-top:var(--sp-2)">
+            Tell us the model and what you can see in its network settings. That is most of the
+            research.
+          </p>
+        </a>
+        <a class="card" href={`${repo}/blob/main/CONTRIBUTING.md`} rel="noopener">
+          <strong>Read the contributing guide</strong>
+          <p class="small muted mb0" style="margin-top:var(--sp-2)">
+            House rules, the data formats, and how to run the checks locally.
+          </p>
+        </a>
+      </div>
+    </article>
+  </div>
+</Base>

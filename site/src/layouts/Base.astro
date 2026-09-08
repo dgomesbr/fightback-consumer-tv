@@ -1,0 +1,132 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  wide?: boolean;
+}
+
+const { title, description, wide = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const here = Astro.url.pathname.replace(/\/$/, "");
+
+const nav = [
+  { href: `${base}/guides`, label: "Guides" },
+  { href: `${base}/data`, label: "Data" },
+  { href: `${base}/contribute`, label: "Contribute" },
+  { href: "https://github.com/dgomesbr/fightback-consumer-tv", label: "GitHub", ext: true },
+];
+
+const full = title === "Fightback: Consumer TV" ? title : `${title} · Fightback: Consumer TV`;
+
+// Built here rather than inline in the attribute, because the angle brackets inside the SVG
+// confuse the template parser when they appear in an attribute expression.
+const faviconSvg =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+  '<rect width="32" height="32" rx="7" fill="#0b0f16"/>' +
+  '<rect x="6" y="8" width="20" height="13" rx="2" fill="none" stroke="#3ddc97" stroke-width="2"/>' +
+  '<path d="M12 24h8" stroke="#3ddc97" stroke-width="2" stroke-linecap="round"/>' +
+  "</svg>";
+const favicon = `data:image/svg+xml,${encodeURIComponent(faviconSvg)}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{full}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#07090d" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={full} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Fightback: Consumer TV" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href={favicon} />
+
+    <!-- No analytics, no fonts from a third party, no tag manager. A site that argues against
+         tracking should not ship any. -->
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <div class="wrap nav-in">
+        <a class="brand" href={base || "/"}>
+          <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+            <rect
+              x="4"
+              y="7"
+              width="24"
+              height="15"
+              rx="2.5"
+              fill="none"
+              stroke="var(--ok)"
+              stroke-width="2"></rect>
+            <path d="M11 26h10" stroke="var(--ok)" stroke-width="2" stroke-linecap="round"></path>
+          </svg>
+          Fightback
+        </a>
+        <nav class="nav-links" aria-label="Main">
+          {
+            nav.map((item) => (
+              <a
+                href={item.href}
+                aria-current={!item.ext && here.startsWith(item.href) ? "page" : undefined}
+                {...(item.ext ? { rel: "noopener" } : {})}
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class={wide ? "" : "wrap"}>
+      <slot />
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <div class="grid grid-3" style="align-items:start">
+          <div>
+            <p class="mb0">
+              <strong style="color:var(--fg)">Fightback: Consumer TV</strong><br />
+              Consumer-side defence for smart TVs.
+            </p>
+          </div>
+          <div>
+            <p class="mb0 tiny">
+              <a href={`${base}/guides`}>Guides</a> ·
+              <a href={`${base}/data`}>Data</a> ·
+              <a href={`${base}/contribute`}>Contribute</a><br />
+              <a href="https://github.com/dgomesbr/fightback-consumer-tv/blob/main/PRIVACY.md"
+                >Privacy</a
+              > ·
+              <a href="https://github.com/dgomesbr/fightback-consumer-tv/blob/main/LEGAL.md"
+                >Legal</a
+              > ·
+              <a href="https://github.com/dgomesbr/fightback-consumer-tv/blob/main/SECURITY.md"
+                >Security</a
+              >
+            </p>
+          </div>
+          <div>
+            <p class="mb0 tiny">
+              Guides CC BY 4.0. Blocklists CC0. Code MIT.<br />
+              This site sets no cookies and loads nothing from a third party.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

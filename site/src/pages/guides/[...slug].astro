@@ -1,0 +1,112 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+
+export async function getStaticPaths() {
+  const guides = await getCollection("guides");
+  return guides
+    // guides/README.md is the index and is rendered by guides/index.astro instead.
+    .filter((g) => g.id !== "README")
+    .map((g) => ({
+      params: { slug: g.id },
+      props: { entry: g },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const repo = "https://github.com/dgomesbr/fightback-consumer-tv";
+
+const data = entry.data as Record<string, any>;
+const title = data.title ?? entry.id.split("/").pop()?.replace(/-/g, " ") ?? entry.id;
+
+// The frontmatter fields worth surfacing above the fold, so a reader knows the ceiling for
+// their hardware before they read four tiers of instructions.
+const facts: Array<{ label: string; value: string; cls: string }> = [];
+if (data.platform) facts.push({ label: data.platform, value: data.platform, cls: "pill-mute" });
+if (data.dns_field) {
+  const map: Record<string, [string, string]> = {
+    standalone: ["DNS on the device", "pill-ok"],
+    "static-ip-required": ["DNS needs a static IP", "pill-warn"],
+    none: ["No DNS field on the device", "pill-bad"],
+  };
+  const [text, cls] = map[data.dns_field] ?? [`DNS: ${data.dns_field}`, "pill-mute"];
+  facts.push({ label: text, value: text, cls });
+}
+if (data.max_tier !== undefined) {
+  const n = Number(data.max_tier);
+  facts.push({
+    label: `Ceiling: tier ${data.max_tier}`,
+    value: String(data.max_tier),
+    cls: n >= 3 ? "pill-ok" : n >= 2 ? "pill-warn" : "pill-bad",
+  });
+}
+if (data.adb === "yes" || data.adb === true) {
+  facts.push({ label: "ADB available", value: "adb", cls: "pill-ok" });
+}
+if (data.root && data.root !== "none") {
+  facts.push({ label: `Root: ${data.root}`, value: String(data.root), cls: "pill-mute" });
+}
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const sourcePath = `guides/${entry.id}.md`;
+const desc =
+  `How to stop ${title} tracking what you watch. Settings, DNS, developer mode and package ` +
+  `removal, with sources and honest warnings about what each step breaks.`;
+---
+
+<Base title={String(title)} description={desc}>
+  <div class="doc">
+    {
+      toc.length > 2 && (
+        <aside class="toc" aria-label="On this page">
+          <p class="toc-h">On this page</p>
+          <ul>
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`} class={h.depth === 3 ? "d2" : ""}>
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+
+    <article class="prose">
+      <p class="tiny muted" style="margin-bottom:var(--sp-3)">
+        <a href={`${base}/guides`}>Guides</a>
+        {entry.id.includes("/") && <> / {entry.id.split("/")[0]}</>}
+      </p>
+
+      {
+        facts.length > 0 && (
+          <div class="meta-strip">
+            {facts.map((f) => (
+              <span class={`pill ${f.cls}`}>{f.label}</span>
+            ))}
+            {data.updated && (
+              <span class="pill pill-mute">
+                Updated {String(data.updated).slice(0, 10)}
+              </span>
+            )}
+          </div>
+        )
+      }
+
+      <Content />
+
+      <hr />
+      <p class="small muted">
+        Found something wrong on your model? A corrected menu path is the most useful
+        contribution this project gets.
+        <br />
+        <a href={`${repo}/issues/new?template=bug_report.yml`} rel="noopener">Report it</a> ·
+        <a href={`${repo}/blob/main/${sourcePath}`} rel="noopener">Edit this page</a> ·
+        <a href={`${repo}/blob/main/CONTRIBUTING.md`} rel="noopener">Contributing guide</a>
+      </p>
+    </article>
+  </div>
+</Base>

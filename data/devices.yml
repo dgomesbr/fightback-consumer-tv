@@ -1,0 +1,230 @@
+# Device capability matrix
+#
+# Drives the device picker on the site and the summary table in guides/README.md.
+# One entry per platform, not per model, because capability tracks the operating system.
+#
+# max_tier is the honest ceiling for a consumer:
+#   0  settings only
+#   1  DNS at the router
+#   2  official developer mode and sideloading
+#   3  disabling preinstalled advertising and metrics packages
+#   4  root or custom firmware, which we document but do not walk through
+
+updated: 2026-09-08
+
+platforms:
+  - id: webos
+    name: LG webOS
+    vendors: [LG]
+    generations: "webOS 1 through 25, 2014 to 2025"
+    guide: vendors/lg-webos.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: yes
+    dev_mode_expires: yes
+    adb: no
+    package_disable: no
+    can_observe_traffic: root-only
+    root: patched-on-current-firmware
+    acr_vendor: Alphonso
+    max_tier: 4
+    notes: >-
+      Developer mode sessions expire and the TV uninstalls sideloaded apps when they do.
+      One Tier 0 command closes the port 3000 and 3001 service that the 2023 CVE chain
+      targeted.
+
+  - id: tizen
+    name: Samsung Tizen
+    vendors: [Samsung]
+    generations: "2015 through 2025 model years"
+    guide: vendors/samsung-tizen.md
+    dns_field: standalone
+    honours_dhcp_dns: mostly
+    dev_mode: yes
+    dev_mode_expires: yes
+    adb: no
+    package_disable: no
+    can_observe_traffic: no
+    root: none
+    acr_vendor: Samsung
+    max_tier: 2
+    notes: >-
+      One of only two platforms where DNS is a standalone setting. Samsung's own API
+      documentation confirms no traffic monitoring is possible. Tizen 6 and later reject
+      SDK distributor certificates, so Tier 2 is close to a dead end.
+
+  - id: roku
+    name: Roku OS
+    vendors: [Roku, TCL, Hisense, Philips, Sharp, Insignia, onn]
+    generations: "Roku OS 9 through 14, players and Roku TVs"
+    guide: vendors/roku.md
+    dns_field: none
+    honours_dhcp_dns: mostly
+    dev_mode: yes
+    dev_mode_expires: no
+    adb: no
+    package_disable: no
+    can_observe_traffic: no
+    root: none
+    acr_vendor: Roku
+    max_tier: 1
+    notes: >-
+      The most locked-down platform covered. No DNS field and no static IP form, so the
+      router is the only option. A peer-reviewed study found Roku needs only two
+      destinations to work, which makes aggressive blocking unusually defensible.
+
+  - id: fire-os
+    name: Amazon Fire OS
+    vendors: [Amazon, Insignia, Toshiba, Panasonic, JVC]
+    generations: "Fire OS 5 through 8, sticks, Cubes and built-in TVs"
+    guide: vendors/amazon-fire-tv.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: yes
+    dev_mode_expires: no
+    adb: yes
+    package_disable: yes
+    can_observe_traffic: yes
+    root: generation-limited
+    acr_vendor: Amazon
+    max_tier: 4
+    notes: >-
+      Android-derived, so a third-party app can observe other apps' traffic. Sideloads
+      never expire. Use pm disable-user rather than uninstall, and version-gate the metrics
+      packages because several break the Settings interface on specific builds.
+
+  - id: google-tv
+    name: Google TV
+    vendors: [Google, Sony, TCL, Hisense, Philips, Sharp, onn]
+    generations: "Google TV, 2020 onward"
+    guide: vendors/google-android-tv.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: yes
+    dev_mode_expires: no
+    adb: yes
+    package_disable: yes
+    can_observe_traffic: yes
+    root: none-except-shield
+    acr_vendor: "Samba TV on Sony and TCL"
+    max_tier: 4
+    notes: >-
+      Widest hardware range in the project. Never run a cross-manufacturer debloat
+      one-liner: the same package is a safe removal on one brand and a boot loop on
+      another, and one widely shared script removes the system VPN consent dialog.
+
+  - id: android-tv
+    name: Android TV
+    vendors: [Sony, TCL, Hisense, Philips, Nvidia, Xiaomi]
+    generations: "Android TV 8 through 14"
+    guide: vendors/google-android-tv.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: yes
+    dev_mode_expires: no
+    adb: yes
+    package_disable: yes
+    can_observe_traffic: yes
+    root: shield-only
+    acr_vendor: "Samba TV on Sony"
+    max_tier: 4
+    notes: >-
+      Nvidia Shield is officially supported by LineageOS and NVIDIA publishes stock
+      recovery images, making it the lowest-risk unlock of any device here.
+
+  - id: vidaa
+    name: Hisense VIDAA
+    vendors: [Hisense, Toshiba]
+    generations: "VIDAA 4 through 7"
+    guide: vendors/hisense-vidaa.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: no
+    dev_mode_expires: n/a
+    adb: no
+    package_disable: no
+    can_observe_traffic: no
+    root: none
+    acr_vendor: unknown
+    max_tier: 2
+    notes: >-
+      Sideloading works only by redirecting a vendor domain and using privileged browser
+      bridge functions. The same functions mean any web page the TV's browser visits can
+      install an app silently, so not using the browser is itself a privacy action.
+
+  - id: smartcast
+    name: Vizio SmartCast
+    vendors: [Vizio]
+    generations: "SmartCast, 2016 onward"
+    guide: vendors/vizio.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: no
+    dev_mode_expires: n/a
+    adb: no
+    package_disable: no
+    can_observe_traffic: no
+    root: none
+    acr_vendor: Inscape
+    max_tier: 1
+    notes: >-
+      No developer access of any kind. The Viewing Data toggle exists because the FTC
+      required affirmative express consent in its 2017 order, so turning it off is a
+      legally backed right rather than a workaround.
+
+  - id: tvos
+    name: Apple tvOS
+    vendors: [Apple]
+    generations: "tvOS 14 through 18"
+    guide: vendors/apple-tvos.md
+    dns_field: standalone
+    honours_dhcp_dns: yes
+    dev_mode: yes
+    dev_mode_expires: yes
+    adb: no
+    package_disable: no
+    can_observe_traffic: tvos-17-plus
+    root: none
+    acr_vendor: none
+    max_tier: 2
+    notes: >-
+      No content recognition, so there is far less to block. tvOS 17 gained third-party
+      packet tunnel support, so whole-device observation is now possible, though App Store
+      approval for such a tool is implausible and TestFlight is the realistic route.
+
+  - id: titan-os
+    name: Philips Titan OS
+    vendors: [Philips]
+    generations: "2024 onward, mostly European models"
+    guide: vendors/other-brands.md
+    dns_field: unknown
+    honours_dhcp_dns: unknown
+    dev_mode: no
+    dev_mode_expires: n/a
+    adb: no
+    package_disable: no
+    can_observe_traffic: no
+    root: none
+    acr_vendor: Samba TV
+    max_tier: 1
+    notes: Partner-gated platform. No consumer developer mode found and the DNS path is undocumented.
+
+  - id: my-home-screen
+    name: Panasonic My Home Screen
+    vendors: [Panasonic]
+    generations: "Firefox OS derived, through 2023"
+    guide: vendors/other-brands.md
+    dns_field: static-ip-required
+    honours_dhcp_dns: mostly
+    dev_mode: no
+    dev_mode_expires: n/a
+    adb: no
+    package_disable: no
+    can_observe_traffic: no
+    root: none
+    acr_vendor: unknown
+    max_tier: 1
+    notes: >-
+      Newer Panasonic flagships ship Amazon Fire TV instead, so check which one you have.
+      Do not wildcard myhomescreen.tv: the mhc hosts under it carry connectivity and app
+      startup.

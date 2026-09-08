@@ -1,0 +1,452 @@
+---
+import fs from "node:fs";
+import path from "node:path";
+import YAML from "yaml";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const repo = "https://github.com/dgomesbr/fightback-consumer-tv";
+const root = path.resolve(process.cwd(), "..");
+
+const devices = YAML.parse(
+  fs.readFileSync(path.join(root, "data", "devices.yml"), "utf8"),
+);
+
+// Counting the generated lists at build time rather than hardcoding a number, so the page
+// cannot claim more coverage than the data supports.
+function countList(rel: string): number {
+  try {
+    return fs
+      .readFileSync(path.join(root, rel), "utf8")
+      .split("\n")
+      .filter((l) => l.trim() && !l.startsWith("#") && !l.startsWith("!")).length;
+  } catch {
+    return 0;
+  }
+}
+const coreCount = countList("blocklists/adguard/fightback-tv-core.txt");
+const neverCount = countList("blocklists/allowlist/fightback-tv-do-not-block.txt");
+
+const dnsLabel: Record<string, { text: string; cls: string }> = {
+  standalone: { text: "Yes, on its own", cls: "pill-ok" },
+  "static-ip-required": { text: "Yes, with static IP", cls: "pill-warn" },
+  none: { text: "No DNS field", cls: "pill-bad" },
+  unknown: { text: "Unknown", cls: "pill-mute" },
+};
+
+const platforms = devices.platforms as Array<Record<string, any>>;
+
+// Order brands by how many platforms they ship, then alphabetically. An earlier version took
+// the first eleven alphabetically, which silently dropped Samsung, Sony, TCL and Vizio.
+const brandCounts = new Map<string, number>();
+for (const p of platforms) {
+  for (const v of p.vendors as string[]) {
+    brandCounts.set(v, (brandCounts.get(v) ?? 0) + 1);
+  }
+}
+const groups = [...brandCounts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([name]) => name);
+---
+
+<Base
+  title="Fightback: Consumer TV"
+  description="Your television is a data business. Per-vendor guides, blocklists and evidence for stopping smart TV tracking, with honest warnings about what each step breaks."
+  wide
+>
+  <!-- ============================================================ hero -->
+  <section class="hero">
+    <div class="wrap hero-in">
+      <div class="hero-copy">
+        <p class="eyebrow">Consumer-side defence for smart TVs</p>
+        <h1>Your television works for someone else.</h1>
+        <p class="lede">
+          Modern TVs fingerprint what is on screen, scan your home network, and sell what they
+          learn. You can stop most of it in an afternoon. Pick your set and follow the steps.
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary" href={`${base}/guides`}>Find your TV</a>
+          <a class="btn btn-ghost" href={`${base}/guides/start-here`}>Start with five minutes</a>
+        </div>
+        <p class="tiny muted" style="margin-top:var(--sp-4)">
+          Free, open source, no account. This site sets no cookies and loads nothing from a
+          third party.
+        </p>
+      </div>
+      <div class="hero-viz">
+        <Hero />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ evidence -->
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">What the measurements say</p>
+      <h2 style="margin-top:0">This is documented, not speculation.</h2>
+      <div class="grid grid-3" style="margin-top:var(--sp-6)">
+        <div class="stat">
+          <div class="stat-n">68<small>%</small></div>
+          <p class="stat-l">
+            of smart TVs ignore the DNS server your router hands them and talk to Google's
+            resolver directly. Changing the setting on the TV is not enough.
+          </p>
+          <p class="stat-src tiny">
+            <a href="https://arxiv.org/abs/2001.08288" rel="noopener">Mazhar and Shafiq, IoTDI 2020</a>
+          </p>
+        </div>
+        <div class="stat">
+          <div class="stat-n">15<small>s</small></div>
+          <p class="stat-l">
+            between content fingerprints from an LG set, built from frames sampled every 10
+            milliseconds. Samsung sends about once a minute.
+          </p>
+          <p class="stat-src tiny">
+            <a href="https://arxiv.org/html/2409.06203v1" rel="noopener">Anselmi et al., IMC 2024</a>
+          </p>
+        </div>
+        <div class="stat">
+          <div class="stat-n">$2.2<small>M</small></div>
+          <p class="stat-l">
+            the FTC fined Vizio in 2017 for capturing second-by-second viewing data from 11
+            million televisions and selling it with demographics attached.
+          </p>
+          <p class="stat-src tiny">
+            <a
+              href="https://www.ftc.gov/news-events/news/press-releases/2017/02/vizio-pay-22-million-ftc-state-new-jersey-settle-charges-it-collected-viewing-histories-11-million"
+              rel="noopener">FTC press release</a
+            >
+          </p>
+        </div>
+      </div>
+
+      <div class="note note-ok" style="margin-top:var(--sp-6);max-width:var(--measure)">
+        <p class="mb0">
+          <strong>The encouraging part.</strong> The same 2024 study found that turning content
+          recognition off actually works. After opting out, the researchers saw no traffic at all
+          to any recognition endpoint they had identified, and no new ones appeared. So the free
+          five-minute step is also the most effective one.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ tiers -->
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">How far you want to go</p>
+      <h2 style="margin-top:0">Four tiers. Stop wherever you like.</h2>
+      <p class="lede" style="margin-bottom:var(--sp-6)">
+        Every tier states what it breaks and how to undo it. Most people do the first two.
+      </p>
+
+      <div class="tiers">
+        <a class="tier" href={`${base}/guides/start-here`}>
+          <span class="tier-n"></span>
+          <span class="tier-body">
+            <strong>Turn it off in the TV's own menus</strong>
+            <span>Content recognition and ad tracking. No hardware, no risk, fully reversible.</span>
+          </span>
+          <span class="tier-meta">5 min</span>
+        </a>
+        <a class="tier" href={`${base}/guides/why-dns`}>
+          <span class="tier-n"></span>
+          <span class="tier-body">
+            <strong>Filter DNS for the whole house</strong>
+            <span>Catches the devices that ignore their own settings, and everything else on the network.</span>
+          </span>
+          <span class="tier-meta">30 min</span>
+        </a>
+        <a class="tier" href={`${base}/guides`}>
+          <span class="tier-n"></span>
+          <span class="tier-body">
+            <strong>Use the vendor's developer mode</strong>
+            <span>Official feature. Inspect the device or sideload a tool. Voids nothing.</span>
+          </span>
+          <span class="tier-meta">1 hr</span>
+        </a>
+        <a class="tier" href={`${base}/guides`}>
+          <span class="tier-n"></span>
+          <span class="tier-body">
+            <strong>Disable the preinstalled ad and metrics apps</strong>
+            <span>Per model, with a do-not-touch list and a recovery path. Reversible.</span>
+          </span>
+          <span class="tier-meta">1 hr</span>
+        </a>
+      </div>
+
+      <p class="small muted" style="margin-top:var(--sp-5);max-width:var(--measure)">
+        There is a fifth tier, rooting and custom firmware. We explain what it achieves and what
+        it risks, then link the projects that maintain it. We do not reproduce the steps here.
+        <a href={`${repo}/blob/main/LEGAL.md`} rel="noopener">Why</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ device picker -->
+  <section class="section" id="devices">
+    <div class="wrap">
+      <p class="eyebrow">Find your set</p>
+      <h2 style="margin-top:0">What can you actually do?</h2>
+      <p class="lede" style="margin-bottom:var(--sp-5)">
+        Brand does not determine platform. A TCL might run Roku, Google TV or VIDAA depending on
+        the model. Check Settings, then About.
+      </p>
+
+      <div class="filter" role="group" aria-label="Filter by brand">
+        <button type="button" data-brand="all" aria-pressed="true">All brands</button>
+        {
+          groups.map((g) => (
+            <button type="button" data-brand={g} aria-pressed="false">
+              {g}
+            </button>
+          ))
+        }
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Platform</th>
+            <th scope="col">Sold as</th>
+            <th scope="col">DNS on the device</th>
+            <th scope="col">Ceiling</th>
+            <th scope="col">Guide</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            platforms.map((p) => {
+              const d = dnsLabel[p.dns_field] ?? dnsLabel.unknown;
+              return (
+                <tr class="dev-row" data-brands={(p.vendors as string[]).join("|")}>
+                  <td>
+                    <strong>{p.name}</strong>
+                    <br />
+                    <span class="tiny muted">{p.generations}</span>
+                  </td>
+                  <td class="tiny">{(p.vendors as string[]).join(", ")}</td>
+                  <td>
+                    <span class={`pill ${d.cls}`}>{d.text}</span>
+                  </td>
+                  <td>
+                    <span
+                      class={`pill ${Number(p.max_tier) >= 3 ? "pill-ok" : Number(p.max_tier) >= 2 ? "pill-warn" : "pill-bad"}`}
+                    >
+                      Tier {p.max_tier}
+                    </span>
+                  </td>
+                  <td>
+                    <a href={`${base}/guides/${String(p.guide).replace(/\.md$/, "")}`}>Open</a>
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+
+      <p class="small muted">
+        Tier 1 in that last column means the device itself offers nothing and the router is your
+        only option. Roku and Vizio owners are in that position, and we say so on their pages
+        rather than padding them out.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================ blocklists -->
+  <section class="section">
+    <div class="wrap">
+      <div class="grid grid-2" style="gap:var(--sp-6);align-items:start">
+        <div>
+          <p class="eyebrow">Blocklists</p>
+          <h2 style="margin-top:0">Knowing what not to block is the hard part.</h2>
+          <p>
+            A blocklist is easy to write. Working out which entries break the app store, the
+            firmware updater, the programme guide or the clock takes evidence, and several widely
+            used lists get it wrong.
+          </p>
+          <p>
+            So we publish both. {coreCount} endpoints with no documented breakage, and {neverCount}
+            {" "}domains that break a television, as an allowlist you can paste into your resolver.
+          </p>
+          <p class="small muted">
+            Every entry carries a source and a stated consequence. Generated from the data files,
+            never hand-edited, and the generator refuses to emit a list containing a domain marked
+            as breaking something.
+          </p>
+          <p>
+            <a class="btn btn-ghost" href={`${repo}/tree/main/blocklists`} rel="noopener"
+              >Browse the lists</a
+            >
+          </p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Examples of what not to block</h3>
+          <table style="margin-bottom:0">
+            <tbody>
+              <tr>
+                <td><code>time.samsungcloudsolution.com</code></td>
+                <td class="tiny">Breaks Plex, YouTube and Prime Video</td>
+              </tr>
+              <tr>
+                <td><code>mas-ext.amazon.com</code></td>
+                <td class="tiny">Apps can no longer be installed</td>
+              </tr>
+              <tr>
+                <td><code>ngfts.lge.com</code></td>
+                <td class="tiny">LG Content Store thumbnails disappear</td>
+              </tr>
+              <tr>
+                <td><code>ns11.whois.co.kr</code></td>
+                <td class="tiny">Series 7 Samsungs cannot open YouTube</td>
+              </tr>
+              <tr>
+                <td><code>gracenote.com</code></td>
+                <td class="tiny">The TV guide stops working</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ contribute -->
+  <section class="section">
+    <div class="wrap">
+      <div class="grid grid-2" style="gap:var(--sp-6);align-items:start">
+        <div>
+          <p class="eyebrow">Help the project</p>
+          <h2 style="margin-top:0">Send us what your TV contacts.</h2>
+          <p>
+            If you already run Pi-hole, AdGuard Home or NextDNS, one command turns your query log
+            into a report. It strips everything identifying, shows you the exact file, and sends
+            nothing until you say so.
+          </p>
+          <pre><code>python collector/router/fightback.py \
+  --source adguard-file --log querylog.json \
+  --device 192.168.1.42 --vendor lg \
+  --model "LG OLED C3" --region GB \
+  --acr optout --preview</code></pre>
+          <p class="small muted">
+            Local-only is the default. There is no code path that uploads a report you have not
+            been shown first.
+          </p>
+          <p>
+            <a class="btn btn-primary" href={`${base}/contribute`}>How to contribute</a>
+          </p>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">What a report contains</h3>
+          <p class="small">
+            Vendor, model family, firmware major version, country, the hostnames contacted, how
+            often, and whether content recognition was switched off.
+          </p>
+          <h4>What it never contains</h4>
+          <p class="small mb0">
+            Your IP address. The TV's address. MAC addresses. Serial numbers. Your Wi-Fi network
+            name. Other devices on your network. URL paths. Payload contents. Timestamps finer
+            than an hour.
+          </p>
+          <p class="small muted" style="margin-top:var(--sp-4)">
+            Those fields do not exist in the schema, so a report cannot carry one even by
+            accident. <a href={`${repo}/blob/main/PRIVACY.md`} rel="noopener">Read the detail</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ scope -->
+  <section class="section">
+    <div class="wrap prose">
+      <p class="eyebrow">Scope</p>
+      <h2 style="margin-top:0">What this project does not do.</h2>
+      <p>
+        It records which endpoints a television contacts, and when. Hostnames, ports, protocols,
+        byte counts. Nothing else.
+      </p>
+      <p>
+        It does not decrypt traffic. It does not bypass certificate pinning. It does not
+        impersonate a vendor service, modify firmware, or ship exploit code. Those limits are
+        deliberate, and they are the same choices the peer-reviewed studies made.
+      </p>
+      <p>
+        We also try not to overstate what we find. A television contacting an advertising endpoint
+        1,400 times while idle is a claim we can support. A television sending your viewing
+        history to an advertiser is not, unless somebody has shown the payload.
+      </p>
+      <p>
+        <a href={`${repo}/blob/main/LEGAL.md`} rel="noopener">Legal position</a> ·
+        <a href={`${repo}/blob/main/PRIVACY.md`} rel="noopener">Privacy</a> ·
+        <a href={`${repo}/blob/main/SECURITY.md`} rel="noopener">Security</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    padding-block: clamp(var(--sp-7), 8vw, var(--sp-9));
+    overflow: hidden;
+  }
+  /* A single soft wash behind the hero. One gradient, no stacked layers, so it does not turn
+     into a hazy mess on a large display. */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10% auto;
+    height: 620px;
+    background: radial-gradient(
+      52% 44% at 62% 34%,
+      color-mix(in oklab, var(--accent), transparent 88%),
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+  .hero-in {
+    position: relative;
+    display: grid;
+    gap: var(--sp-7);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .hero-in {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--sp-6);
+    }
+  }
+  .hero-copy h1 {
+    margin-bottom: var(--sp-4);
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+  }
+  .hero-viz {
+    min-width: 0;
+  }
+</style>
+
+<script>
+  // The only client JavaScript on the site. It filters rows that are already in the DOM, so
+  // the table works with scripting disabled and this just narrows it.
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".filter button");
+  const rows = document.querySelectorAll<HTMLTableRowElement>(".dev-row");
+
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const brand = btn.dataset.brand;
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      rows.forEach((row) => {
+        const brands = (row.dataset.brands ?? "").split("|");
+        row.hidden = brand !== "all" && !brands.includes(brand ?? "");
+      });
+    });
+  });
+</script>

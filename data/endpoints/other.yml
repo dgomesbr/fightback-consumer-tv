@@ -1,0 +1,202 @@
+# Philips, Panasonic, Toshiba, Sharp and Xiaomi endpoints
+#
+# Brands without enough sourced material for a file of their own. Several of these ship
+# other vendors' operating systems depending on model and market, in which case the
+# relevant vendor file applies instead. See guides/vendors/other-brands.md.
+
+vendor: other
+platform: other
+updated: 2026-09-08
+
+entries:
+  # ---------------------------------------------------------------- Philips
+  - domain: ad.nettvservices.com
+    vendor: philips
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: legacyportal.nettvservices.com
+    vendor: philips
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: nettv.corio.com
+    vendor: philips
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: deviceportal.nettvservices.com
+    vendor: philips
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Applications stop working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: epg.corio.com
+    vendor: philips
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The programme guide stops working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: ecdinterface.philips.com
+    vendor: philips
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: Hue Bridge integration stops working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- Panasonic
+  - domain: myhomescreen.tv
+    vendor: panasonic
+    wildcard: false
+    regex: '^(collect|usage)(-(us|eu)-fy20[0-9]{2})?\.myhomescreen\.tv$'
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Per-fiscal-year collectors from fy2014 to fy2022, plus the unsuffixed hosts. Perflyst
+      warns explicitly against wildcarding myhomescreen.tv, because the mhc- hosts under the
+      same domain carry connectivity and app startup.
+  - domain: mhc-sec-eu.myhomescreen.tv
+    vendor: panasonic
+    purpose: telemetry
+    tier: aggressive
+    safe_to_block: unknown
+    breaks: unknown
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: x2.vindicosuite.com
+    vendor: panasonic
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: mhc-eu.myhomescreen.tv
+    vendor: panasonic
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The TV loses internet connectivity.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: mhc-us.myhomescreen.tv
+    vendor: panasonic
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The TV loses internet connectivity.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: vcs.vdspf.com
+    vendor: panasonic
+    purpose: ota
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      The TV is notified of new firmware but cannot download or install it, which leaves a
+      permanent update prompt.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- Toshiba
+  - domain: fxmconnect.com
+    vendor: toshiba
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: Toshiba's recognition is also Samba TV. See sony.yml for the samba.tv entries.
+
+  # ---------------------------------------------------------------- Xiaomi
+  - domain: mitv.tracking.intl.miui.com
+    vendor: xiaomi
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+  - domain: tracking.intl.miui.com
+    vendor: xiaomi
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/xiaomi
+  - domain: data.mistat.intl.xiaomi.com
+    vendor: xiaomi
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://raw.githubusercontent.com/nextdns/native-tracking-domains/main/domains/xiaomi
+  - domain: sdkconfig.ad.intl.xiaomi.com
+    vendor: xiaomi
+    purpose: ads
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- Sharp
+  - domain: api.accuweather.com
+    vendor: sharp
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: The weather widget stops working.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+    notes: >-
+      Perflyst's Sharp section contains only this and an NIST time host, both flagged as
+      probably not a good idea to block. Sharp's own telemetry has not been documented.
+  - domain: time-a.timefreq.bldrdoc.gov
+    vendor: sharp
+    purpose: ntp
+    tier: never
+    safe_to_block: false
+    breaks: The clock drifts and certificate validation starts failing.
+    source: https://github.com/Perflyst/PiHoleBlocklist/blob/master/SmartTV.txt
+
+  # ---------------------------------------------------------------- cross-vendor measurement
+  - domain: imrworldwide.com
+    vendor: multiple
+    wildcard: true
+    purpose: telemetry
+    tier: core
+    safe_to_block: true
+    breaks: null
+    source: https://perflyst.github.io/PiHoleBlocklist/AmazonFireTV.txt
+    notes: Nielsen audience measurement. Appears across many platforms.
+  - domain: gracenote.com
+    vendor: multiple
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      The programme guide stops working on any TV that sources its guide data from
+      Gracenote, which is many of them.
+    source: https://github.com/GhostPortTechnologies/Ghostport-Phantom-OS/blob/main/etc/blocklists/acr-hosts.txt
+    notes: >-
+      Present as an explicit guard. At least one circulating content-recognition blocklist
+      includes gracenote.com, which will kill a reader's TV guide. Gracenote is a data
+      supplier, not a recognition endpoint.
+  - domain: nielsen.com
+    vendor: multiple
+    wildcard: true
+    purpose: functional
+    tier: never
+    safe_to_block: false
+    breaks: >-
+      Nothing on a TV. This is Nielsen's corporate website. Blocking it achieves nothing and
+      suggests a list built by pattern-matching on company names.
+    source: https://github.com/GhostPortTechnologies/Ghostport-Phantom-OS/blob/main/etc/blocklists/acr-hosts.txt
+    notes: Guard entry. The measurement endpoint is imrworldwide.com, listed above.
