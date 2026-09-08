@@ -1,0 +1,24 @@
+# The site is the only part of this project with third-party dependencies. Keeping them current
+# matters more here than in an average repository: a project that argues about privacy and
+# security should not ship a dependency tree with open advisories against it.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+    open-pull-requests-limit: 5
+    groups:
+      # Astro pulls a large transitive tree. Grouping keeps one pull request to review rather
+      # than a dozen that all have to land together anyway.
+      astro:
+        patterns: ["astro", "@astrojs/*", "vite", "rolldown", "esbuild", "sharp"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3

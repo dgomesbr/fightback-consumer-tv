@@ -33,9 +33,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Astro 7 requires Node 22.12 or later. Kept in step with the engines field in
+      # site/package.json, so a local build and a CI build fail the same way.
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: site/package-lock.json
 

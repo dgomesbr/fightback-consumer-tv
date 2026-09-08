@@ -130,8 +130,15 @@ CI runs on every pull request:
 Run the checks locally first:
 
 ```bash
-python -m pytest collector/tests
+python -m pytest collector/router/tests
 python tools/build_blocklists.py --check
+python tools/validate_reports.py --self-test
+```
+
+The site needs **Node 22.12 or later**, because Astro 7 does. If `npm run build` tells you your Node
+is unsupported, that is why.
+
+```bash
 cd site && npm ci && npm run build
 ```
 
