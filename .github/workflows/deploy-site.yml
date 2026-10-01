@@ -31,7 +31,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Astro 7 requires Node 22.12 or later. Kept in step with the engines field in
       # site/package.json, so a local build and a CI build fail the same way.
